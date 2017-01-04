@@ -1,0 +1,10 @@
+---
+title: Minify
+description: Remove white–spaces and unused comments in HTML, CSS and JavaScript files.
+author: Taufik Nurrohman
+version: 1.0.0
+...
+
+This extension reduces the page size by removing the unused white–spaces and comments in the HTML output.
+
+<!-- block:donate -->
