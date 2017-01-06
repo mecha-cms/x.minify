@@ -162,19 +162,19 @@ function fn_minify_html_union($input, $quote) {
             if (strpos($m[2], '://') !== false) {
                 $host = $url->protocol . $url->host;
                 $m[2] = str_replace([
-                    '="' . $host . '/',
-                    '="' . $host . '?',
-                    '="' . $host . '&',
-                    '="' . $host . '#',
-                    '="' . $host . '"',
-                    "='" . $host . "'"
+                    $host . '/',
+                    $host . '?',
+                    $host . '&',
+                    $host . '#',
+                    $host . '"',
+                    $host . "'"
                 ], [
-                    '="/',
-                    '="?',
-                    '="&',
-                    '="#',
-                    '="/"',
-                    "='/'"
+                    '/',
+                    '?',
+                    '&',
+                    '#',
+                    '/"',
+                    "/'"
                 ], $m[2]);
             }
             $a = 'a(sync|uto(focus|play))|c(hecked|ontrols)|d(efer|isabled)|hidden|ismap|loop|multiple|open|re(adonly|quired)|s((cop|elect)ed|pellcheck)';
