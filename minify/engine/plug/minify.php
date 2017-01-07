@@ -120,7 +120,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
     foreach (fn_minify([Minify::COMMENT_HTML, Minify::HTML_KEEP, Minify::HTML, Minify::HTML_ENT], $input) as $part) {
         if ($part === "\n") continue;
         if (!trim($part) && (
-            $prev[0] === '<' && $prev[1] !== '/' && !preg_match('#^<i(?:mg|nput)\b#', $prev)
+            $prev[0] === '<' && $prev[1] !== '/' && (substr($prev, -2) === '/>' || !preg_match('#^<i(?:mg|nput)\b#', $prev))
         )) continue;
         if ($part !== ' ' && !trim($part) || $comment !== 1 && strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
