@@ -119,11 +119,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
     $output = $prev = "";
     foreach (fn_minify([Minify::COMMENT_HTML, Minify::HTML_KEEP, Minify::HTML, Minify::HTML_ENT], $input) as $part) {
         if ($part === "\n") continue;
-        $x = $part !== ' ' && !trim($part);
-        if ($x && (
-            $prev[0] === '<' && $prev[1] !== '/' && substr($prev, -2) !== '/>' && !preg_match('#^<i(?:mg|nput)\b#', $prev)
-        )) continue;
-        if ($x || $comment !== 1 && strpos($part, '<!--') === 0) {
+        if ($part !== ' ' && !trim($part) || $comment !== 1 && strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
             if ($comment === 2 && substr($part, -12) === '<![endif]-->') {
                 $output .= $part;
@@ -139,7 +135,6 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
         }
         $prev = $part;
     }
-    $output = str_replace(' </', '</', $output);
     // Force space with `&#x0020;` and line–break with `&#x000A;`
     return str_ireplace(['&#x0020;', '&#x20;', '&#x000A;', '&#xA;'], [' ', ' ', N, N], trim($output));
 }
