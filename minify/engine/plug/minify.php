@@ -2,9 +2,9 @@
 
 
 /**
- * `0`: Remove
- * `1`: Keep
- * `2`: Remove if/but/when …
+ * 0: Remove
+ * 1: Keep
+ * 2: Remove if/but/when …
  */
 
 function fn_minify($pattern, $input) {
