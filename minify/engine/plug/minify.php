@@ -128,7 +128,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
         }
         if ($part[0] === '<' && substr($part, -1) === '>') {
             $output .= fn_minify_html_union($part, $quote);
-        } else if ($part[0] === '&' && substr($part, -1) === ';') {
+        } else if ($part[0] === '&' && substr($part, -1) === ';' && $part !== '&lt;' && $part !== '&gt;' && $part !== '&amp;') {
             $output .= html_entity_decode($part); // Evaluate HTML entit(y|ies)
         } else {
             $output .= preg_replace('#\s+#', ' ', $part);
