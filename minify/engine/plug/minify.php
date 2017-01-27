@@ -15,7 +15,7 @@ function fn_minify_css($input, $comment = 2, $quote = 2) {
     if (!is_string($input) || !$input = n(trim($input))) return $input;
     $output = $prev = "";
     foreach (fn_minify([Minify::COMMENT_CSS, Minify::STRING], $input) as $part) {
-        if (!trim($part)) continue;
+        if (trim($part) === "") continue;
         if ($comment !== 1 && strpos($part, '/*') === 0 && substr($part, -2) === '*/') {
             if (
                 $comment === 2 && (
@@ -119,7 +119,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
     $output = $prev = "";
     foreach (fn_minify([Minify::COMMENT_HTML, Minify::HTML_KEEP, Minify::HTML, Minify::HTML_ENT], $input) as $part) {
         if ($part === "\n") continue;
-        if ($part !== ' ' && !trim($part) || $comment !== 1 && strpos($part, '<!--') === 0) {
+        if ($part !== ' ' && trim($part) === "" || $comment !== 1 && strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
             if ($comment === 2 && substr($part, -12) === '<![endif]-->') {
                 $output .= $part;
@@ -210,7 +210,7 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
     if (!is_string($input) || !$input = n(trim($input))) return $input;
     $output = $prev = "";
     foreach (fn_minify([Minify::COMMENT_CSS, Minify::STRING, Minify::COMMENT_JS, Minify::PATTERN_JS], $input) as $part) {
-        if (!trim($part)) continue;
+        if (trim($part) === "") continue;
         if ($comment !== 1 && (
             substr($part, 0, 2) === '//' || // Remove inline comment(s)
             strpos($part, '/*') === 0 && substr($part, -2) === '*/'
