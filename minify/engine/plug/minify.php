@@ -32,7 +32,7 @@ function fn_minify_css($input, $comment = 2, $quote = 2) {
             continue;
         }
         if ($part[0] === '"' && substr($part, -1) === '"' || $part[0] === "'" && substr($part, -1) === "'") {
-            // Remove quote(s) where possible …
+            // Remove quote(s) where possible…
             $q = $part[0];
             if (
                 $quote !== 1 && (
