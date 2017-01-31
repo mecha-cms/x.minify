@@ -8,7 +8,7 @@
  */
 
 function fn_minify($pattern, $input) {
-    return preg_split('#(' . implode('|', $pattern) . ')#', $input, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    return preg_split('#(' . implode('|', $pattern) . ')#', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 }
 
 function fn_minify_css($input, $comment = 2, $quote = 2) {
