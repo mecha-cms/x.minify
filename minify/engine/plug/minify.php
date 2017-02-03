@@ -76,7 +76,7 @@ function fn_minify_css_union($input) {
         // Replace `:0 0`, `:0 0 0` and `:0 0 0 0` with `:0` [^7]
         '#:(0\s+){0,3}0(?=[!,;\)\}]|$)#',
         // Replace `background(?:-position)?:(0|none)` with `background$1:0 0` [^8]
-        '#\b(background(?:-position)?):(0|none)\b#i',
+        '#\b(background(?:-position)?):(?:0|none)([;\}])#i',
         // Replace `(border(?:-radius)?|outline):none` with `$1:0` [^9]
         '#\b(border(?:-radius)?|outline):none\b#i',
         // Remove empty selector(s) [^10]
@@ -101,7 +101,7 @@ function fn_minify_css_union($input) {
         // [^7]
         ':0',
         // [^8]
-        '$1:0 0',
+        '$1:0 0$2',
         // [^9]
         '$1:0',
         // [^10]
