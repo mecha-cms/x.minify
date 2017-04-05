@@ -8,7 +8,7 @@ class Minify extends Genome {
     const COMMENT_HTML = '<!\-{2}[\s\S]*?\-{2}>';
     const COMMENT_JS = '//[^\n]*';
 
-    const PATTERN_JS = '\b/[^\n]+?/[gimuy]*\b';
+    const PATTERN_JS = '/[^\n]+?/[gimuy]*';
 
     const HTML = '<[!/]?[a-zA-Z\d:.-]+[\s\S]*?>';
     const HTML_ENT = '&(?:[a-zA-Z\d]+|\#\d+|\#x[a-fA-F\d]+);';
