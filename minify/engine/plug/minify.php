@@ -212,7 +212,7 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
     foreach (fn_minify([Minify::COMMENT_CSS, Minify::STRING, Minify::COMMENT_JS, Minify::PATTERN_JS], $input) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && (
-            substr($part, 0, 2) === '//' || // Remove inline comment(s)
+            strpos($part, '//') === 0 || // Remove inline comment(s)
             strpos($part, '/*') === 0 && substr($part, -2) === '*/'
         )) {
             if (
@@ -229,7 +229,9 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
             }
             continue;
         }
-        if ($part[0] === '"' && substr($part, -1) === '"' || $part[0] === "'" && substr($part, -1) === "'") {
+        if ($part[0] === '/' && (substr($part, -1) === '/' || preg_match('#\/[gimuy]*$#', $part))) {
+            $output .= $part;
+        } else if ($part[0] === '"' && substr($part, -1) === '"' || $part[0] === "'" && substr($part, -1) === "'") {
             // TODO: Remove quote(s) where possible …
             $output .= $part;
         } else {
