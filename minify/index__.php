@@ -1,6 +1,6 @@
 <?php
 
-function fn_minify_replace($content) {
+function fn_minify($content) {
     $state = Extend::state(__DIR__);
     // Minify embedded CSS
     if (stripos($content, '</style>') !== false) {
@@ -22,4 +22,4 @@ function fn_minify_replace($content) {
     return $content;
 }
 
-Hook::set('shield.output', 'fn_minify_replace', 2);
+Hook::set('shield.output', 'fn_minify', 2);

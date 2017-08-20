@@ -3,7 +3,7 @@ title: Minify
 description: Remove white–spaces and unused comments in HTML, CSS and JavaScript files.
 author: Taufik Nurrohman
 type: Markdown
-version: 2.0.2
+version: 2.0.3
 ...
 
 This extension reduces the page size by removing the unused white–spaces and comments in the HTML output.
