@@ -1,6 +1,6 @@
 ---
 title: Minify
-description: Remove white–spaces and unused comments in HTML, CSS and JavaScript files.
+description: Remove white-spaces and unused comments in HTML, CSS and JavaScript files.
 author: Taufik Nurrohman
 type: Markdown
 version: 2.0.3
