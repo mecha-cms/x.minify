@@ -264,6 +264,6 @@ function fn_minify_js_union($input) {
     ], $input);
 }
 
-Minify::plug('css', 'fn_minify_css');
-Minify::plug('html', 'fn_minify_html');
-Minify::plug('js', 'fn_minify_js');
+Minify::_('css', 'fn_minify_css');
+Minify::_('html', 'fn_minify_html');
+Minify::_('js', 'fn_minify_js');
