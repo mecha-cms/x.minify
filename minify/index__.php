@@ -22,4 +22,4 @@ function fn_minify($content) {
     return $content;
 }
 
-Hook::set('shield.output', 'fn_minify', 2);
+Hook::set('shield.yield', 'fn_minify', 2);
