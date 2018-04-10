@@ -264,6 +264,7 @@ function fn_minify_js_union($input) {
     ], $input);
 }
 
+// Set property by file extension
 Minify::_('css', 'fn_minify_css');
 Minify::_('html', 'fn_minify_html');
 Minify::_('js', 'fn_minify_js');
