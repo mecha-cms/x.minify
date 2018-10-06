@@ -6,6 +6,114 @@ type: Markdown
 version: 2.1.0
 ...
 
-This extension reduces the page size by removing the unused white–spaces and comments in the HTML output.
+This extension reduces the page size by removing the unused white-spaces and comments in the HTML output. There is a file named `config.php` in the `lot\state` folder. This file serves to determine how the minifier works.
+
+~~~ .php
+// `Minify::{$any}($input, $comment, $quote)`
+[
+    'css' => [2, 2], // `[$comment, $quote]`
+    'html' => [2, 1],
+    'js' => [2, 2]
+]
+~~~
+
+Code | Description
+---- | -----------
+0 | Remove
+1 | Keep
+2 | Remove if/but/when…
+
+---
+
+### Usage
+
+#### HTML
+
+~~~ .xmp.php
+Minify::html($input, $comment = 2, $quote = 1);
+~~~
+
+Minify HTML string:
+
+~~~ .php
+echo Minify::html('<!DOCTYPE html>
+<html dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <!-- remove -->
+  </head>
+  <body>
+    <!--[if IE]> keep <![endif]-->
+    <h1>Test</h1>
+    <p>
+      <button>Button 1</button> <button>Button 2</button>
+    </p>
+  </body>
+</html>');
+~~~
+
+#### CSS
+
+~~~ .xmp.php
+Minify::css($input, $comment = 2, $quote = 0);
+~~~
+
+Minify CSS string:
+
+~~~ .php
+echo Minify::css('* {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+/* remove */
+
+/*! keep */
+
+/** keep */
+
+/* @licence keep */
+
+/* @license keep */
+
+/* @preserve keep */
+
+html {
+  background: #fff;
+  font: normal normal 13px/1.5 Helmet, FreeSans, sans-serif;
+  color: #000;
+}');
+~~~
+
+#### JS
+
+~~~ .xmp.php
+Minify::js($input, $comment = 2);
+~~~
+
+Minify JavaScript string:
+
+~~~ .php
+echo Minify::js('var i, j, k = Date.now();
+
+for (i = 0, j = k; i < k; ++i) {
+    console.log("bark: " + i);
+}');
+~~~
+
+---
+
+#### Options
+
+Parameter | Description
+--------- | -----------
+`$input` | The string input to be minified.
+`$comment` | The `$comment` parameter value consists of `0`, `1` and `2`. `0` means remove all comments, `1` means preserve all comments, `2` means remove all comments except special comments like IE conditional comments or license comments.
+`$quote` | The `$quote` parameter value consists of `0` and `1`. `0` means remove quotes where possible, `1` means preserve all quotes.
 
 <!-- block:donate -->

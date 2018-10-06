@@ -14,13 +14,16 @@ function fn_minify_pattern($pattern, $input) {
 function fn_minify_css($input, $comment = 2, $quote = 2) {
     if (!is_string($input) || !$input = n(trim($input))) return $input;
     $output = $prev = "";
-    foreach (fn_minify_pattern([Minify::COMMENT_CSS, Minify::STRING], $input) as $part) {
+    foreach (fn_minify_pattern([
+        Minify::COMMENT_CSS,
+        Minify::STRING
+    ], $input) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && strpos($part, '/*') === 0 && substr($part, -2) === '*/') {
             if (
                 $comment === 2 && (
                     // Detect special comment(s) from the third character. It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                    strpos('*!', $part[2]) !== false ||
+                    isset($part[2]) && strpos('*!', $part[2]) !== false ||
                     // Detect license comment(s) from the content. It should contains character(s) like `@license`
                     stripos($part, '@licence') !== false || // noun
                     stripos($part, '@license') !== false || // verb
@@ -34,15 +37,18 @@ function fn_minify_css($input, $comment = 2, $quote = 2) {
         if ($part[0] === '"' && substr($part, -1) === '"' || $part[0] === "'" && substr($part, -1) === "'") {
             // Remove quote(s) where possible…
             $q = $part[0];
+            // Make sure URL does no contains `[ \n\t"']` character(s)
+            $clean = t($part, $q); // Trim quote(s)
+            $ok = strcspn($clean, " \n\t\"'") === strlen($clean);
             if (
                 $quote !== 1 && (
                     // <https://www.w3.org/TR/CSS2/syndata.html#uri>
-                    substr($prev, -4) === 'url(' && preg_match('#\burl\($#', $prev) ||
+                    substr($prev, -4) === 'url(' && preg_match('#\burl\($#', $prev) && $ok ||
                     // <https://www.w3.org/TR/CSS2/syndata.html#characters>
                     substr($prev, -1) === '=' && preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $part)
                 )
             ) {
-                $part = t($part, $q); // trim quote(s)
+                $part = $clean;
             }
             $output .= $part;
         } else {
@@ -70,7 +76,8 @@ function fn_minify_css_union($input) {
         // Remove white–space(s) around punctuation(s) [^4]
         '#\s*([~!@*\(\)+=\{\}\[\]:;,>\/])\s*#',
         // Replace zero unit(s) with `0` [^5]
-        '#\b(?<!\d\.)(?:0+\.)?0+(?:[a-z]+\b)#i',
+        // <https://www.w3.org/Style/Examples/007/units.en.html>
+        '#\b(?<!\d\.)(?:0+\.)?0+(?:(?:cm|em|ex|in|mm|pc|pt|px|rem|vh|vmax|vmin|vw)\b)#',
         // Replace `0.6` with `.6` [^6]
         '#\b0+\.(\d+)#',
         // Replace `:0 0`, `:0 0 0` and `:0 0 0 0` with `:0` [^7]
@@ -117,7 +124,12 @@ function fn_minify_css_union($input) {
 function fn_minify_html($input, $comment = 2, $quote = 1) {
     if (!is_string($input) || !$input = n(trim($input))) return $input;
     $output = $prev = "";
-    foreach (fn_minify_pattern([Minify::COMMENT_HTML, Minify::HTML_KEEP, Minify::HTML, Minify::HTML_ENT], $input) as $part) {
+    foreach (fn_minify_pattern([
+        Minify::COMMENT_HTML,
+        Minify::HTML_KEEP,
+        Minify::HTML,
+        Minify::HTML_ENT
+    ], $input) as $part) {
         if ($part === "\n") continue;
         if ($part !== ' ' && trim($part) === "" || $comment !== 1 && strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
@@ -140,12 +152,12 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
 }
 
 function fn_minify_html_union($input, $quote) {
+    global $url;
     if (
         strpos($input, ' ') === false &&
         strpos($input, "\n") === false &&
         strpos($input, "\t") === false
     ) return $input;
-    $url = new URL;
     return preg_replace_callback('#<\s*([^\/\s]+)\s*(?:>|(\s[^<>]+?)\s*>)#', function($m) use($quote, $url) {
         if (isset($m[2])) {
             // Minify inline CSS(s)
@@ -209,7 +221,12 @@ function fn_minify_html_union_attr($input) {
 function fn_minify_js($input, $comment = 2, $quote = 2) {
     if (!is_string($input) || !$input = n(trim($input))) return $input;
     $output = $prev = "";
-    foreach (fn_minify_pattern([Minify::COMMENT_CSS, Minify::STRING, Minify::COMMENT_JS, Minify::PATTERN_JS], $input) as $part) {
+    foreach (fn_minify_pattern([
+        Minify::COMMENT_CSS,
+        Minify::STRING,
+        Minify::COMMENT_JS,
+        Minify::PATTERN_JS
+    ], $input) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && (
             strpos($part, '//') === 0 || // Remove inline comment(s)
@@ -218,7 +235,7 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
             if (
                 $comment === 2 && (
                     // Detect special comment(s) from the third character. It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                    strpos('*!', $part[2]) !== false ||
+                    isset($part[2]) && strpos('*!', $part[2]) !== false ||
                     // Detect license comment(s) from the content. It should contains character(s) like `@license`
                     stripos($part, '@licence') !== false || // noun
                     stripos($part, '@license') !== false || // verb
@@ -231,7 +248,11 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
         }
         if ($part[0] === '/' && (substr($part, -1) === '/' || preg_match('#\/[gimuy]*$#', $part))) {
             $output .= $part;
-        } else if ($part[0] === '"' && substr($part, -1) === '"' || $part[0] === "'" && substr($part, -1) === "'") {
+        } else if (
+            $part[0] === '"' && substr($part, -1) === '"' ||
+            $part[0] === "'" && substr($part, -1) === "'" ||
+            $part[0] === '`' && substr($part, -1) === '`' // ES6
+        ) {
             // TODO: Remove quote(s) where possible …
             $output .= $part;
         } else {
@@ -243,11 +264,11 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
 }
 
 function fn_minify_js_union($input) {
-    return preg_replace([
+    return trim(preg_replace([
         // Remove white–space(s) around punctuation(s) [^1]
         '#\s*([!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])\s*#',
         // Remove the last semi–colon and comma [^2]
-        '#[;,]([\]\}])#',
+        '#[;,]([\]\}\)])#',
         // Replace `true` with `!0` and `false` with `!1` [^3]
         '#\btrue\b#', '#\bfalse\b#', '#\b(return\s?)\s*\b#',
         // Replace `new Array(x)` with `[x]` … [^4]
@@ -261,7 +282,7 @@ function fn_minify_js_union($input) {
         '!0', '!1', '$1',
         // [^4]
         '[$1]', '{$1}'
-    ], $input);
+    ], $input));
 }
 
 // Set property by file extension

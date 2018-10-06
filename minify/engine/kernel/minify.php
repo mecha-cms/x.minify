@@ -2,11 +2,12 @@
 
 class Minify extends Genome {
 
-    const STRING = '"(?:[^"\\\]|\\\.)*"|\'(?:[^\'\\\]|\\\.)*\'';
+    const STRING = '"(?:[^"\\\]|\\\.)*"|\'(?:[^\'\\\]|\\\.)*\'|`(?:[^`\\\]|\\\.)*`';
 
     const COMMENT_CSS = '/\*[\s\S]*?\*/';
     const COMMENT_HTML = '<!\-{2}[\s\S]*?\-{2}>';
     const COMMENT_JS = '//[^\n]*';
+    const COMMENT_SH = '\#[^\n]*';
 
     const PATTERN_JS = '/[^\n]+?/[gimuy]*';
 
