@@ -1,4 +1,4 @@
-<?php
+<?php namespace fn\minify;
 
 
 /**
@@ -7,16 +7,16 @@
  * 2: Remove if/but/when …
  */
 
-function fn_minify_pattern($pattern, $input) {
+function pattern($pattern, $input) {
     return preg_split('#(' . implode('|', $pattern) . ')#', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 }
 
-function fn_minify_css($input, $comment = 2, $quote = 2) {
-    if (!is_string($input) || !$input = n(trim($input))) return $input;
+function css($input, $comment = 2, $quote = 2) {
+    if (!is_string($input) || !$input = \n(trim($input))) return $input;
     $output = $prev = "";
-    foreach (fn_minify_pattern([
-        Minify::COMMENT_CSS,
-        Minify::STRING
+    foreach (pattern([
+        \Minify::COMMENT_CSS,
+        \Minify::STRING
     ], $input) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && strpos($part, '/*') === 0 && substr($part, -2) === '*/') {
@@ -38,7 +38,7 @@ function fn_minify_css($input, $comment = 2, $quote = 2) {
             // Remove quote(s) where possible…
             $q = $part[0];
             // Make sure URL does no contains `[ \n\t"']` character(s)
-            $clean = t($part, $q); // Trim quote(s)
+            $clean = \t($part, $q); // Trim quote(s)
             $ok = strcspn($clean, " \n\t\"'") === strlen($clean);
             if (
                 $quote !== 1 && (
@@ -52,14 +52,14 @@ function fn_minify_css($input, $comment = 2, $quote = 2) {
             }
             $output .= $part;
         } else {
-            $output .= fn_minify_css_union($part);
+            $output .= css_union($part);
         }
         $prev = $part;
     }
     return trim($output);
 }
 
-function fn_minify_css_union($input) {
+function css_union($input) {
     if (stripos($input, 'calc(') !== false) {
         // Keep important white–space(s) in `calc()`
         $input = preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function($m) {
@@ -121,14 +121,14 @@ function fn_minify_css_union($input) {
     return trim(str_replace(X, ' ', $input));
 }
 
-function fn_minify_html($input, $comment = 2, $quote = 1) {
-    if (!is_string($input) || !$input = n(trim($input))) return $input;
+function html($input, $comment = 2, $quote = 1) {
+    if (!is_string($input) || !$input = \n(trim($input))) return $input;
     $output = $prev = "";
-    foreach (fn_minify_pattern([
-        Minify::COMMENT_HTML,
-        Minify::HTML_KEEP,
-        Minify::HTML,
-        Minify::HTML_ENT
+    foreach (pattern([
+        \Minify::COMMENT_HTML,
+        \Minify::HTML_KEEP,
+        \Minify::HTML,
+        \Minify::HTML_ENT
     ], $input) as $part) {
         if ($part === "\n") continue;
         if ($part !== ' ' && trim($part) === "" || $comment !== 1 && strpos($part, '<!--') === 0) {
@@ -139,7 +139,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
             continue;
         }
         if ($part[0] === '<' && substr($part, -1) === '>') {
-            $output .= fn_minify_html_union($part, $quote);
+            $output .= html_union($part, $quote);
         } else if ($part[0] === '&' && substr($part, -1) === ';' && $part !== '&lt;' && $part !== '&gt;' && $part !== '&amp;') {
             $output .= html_entity_decode($part); // Evaluate HTML entit(y|ies)
         } else {
@@ -151,7 +151,7 @@ function fn_minify_html($input, $comment = 2, $quote = 1) {
     return str_ireplace(['&#x0020;', '&#x20;', '&#x000A;', '&#xA;'], [' ', ' ', N, N], trim($output));
 }
 
-function fn_minify_html_union($input, $quote) {
+function html_union($input, $quote) {
     global $url;
     if (
         strpos($input, ' ') === false &&
@@ -163,7 +163,7 @@ function fn_minify_html_union($input, $quote) {
             // Minify inline CSS(s)
             if (stripos($m[2], ' style=') !== false) {
                 $m[2] = preg_replace_callback('#( style=)([\'"]?)(.*?)\2#i', function($m) {
-                    return $m[1] . $m[2] . fn_minify_css($m[3]) . $m[2];
+                    return $m[1] . $m[2] . css($m[3]) . $m[2];
                 }, $m[2]);
             }
             // Minify URL(s)
@@ -201,31 +201,31 @@ function fn_minify_html_union($input, $quote) {
                 // [^3]
                 '/'
             ], str_replace("\n", ' ', $m[2])) . '>';
-            return $quote !== 1 ? fn_minify_html_union_attr($a) : $a;
+            return $quote !== 1 ? html_union_attr($a) : $a;
         }
         return '<' . $m[1] . '>';
     }, $input);
 }
 
-function fn_minify_html_union_attr($input) {
+function html_union_attr($input) {
     if (strpos($input, '=') === false) return $input;
-    return preg_replace_callback('#=(' . Minify::STRING . ')#', function($m) {
+    return preg_replace_callback('#=(' . \Minify::STRING . ')#', function($m) {
         $q = $m[1][0];
         if (strpos($m[1], ' ') === false && preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $m[1])) {
-            return '=' . t($m[1], $q);
+            return '=' . \t($m[1], $q);
         }
         return $m[0];
     }, $input);
 }
 
-function fn_minify_js($input, $comment = 2, $quote = 2) {
-    if (!is_string($input) || !$input = n(trim($input))) return $input;
+function js($input, $comment = 2, $quote = 2) {
+    if (!is_string($input) || !$input = \n(trim($input))) return $input;
     $output = $prev = "";
-    foreach (fn_minify_pattern([
-        Minify::COMMENT_CSS,
-        Minify::STRING,
-        Minify::COMMENT_JS,
-        Minify::PATTERN_JS
+    foreach (pattern([
+        \Minify::COMMENT_CSS,
+        \Minify::STRING,
+        \Minify::COMMENT_JS,
+        \Minify::PATTERN_JS
     ], $input) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && (
@@ -256,14 +256,14 @@ function fn_minify_js($input, $comment = 2, $quote = 2) {
             // TODO: Remove quote(s) where possible …
             $output .= $part;
         } else {
-            $output .= fn_minify_js_union($part);
+            $output .= js_union($part);
         }
         $prev = $part;
     }
     return $output;
 }
 
-function fn_minify_js_union($input) {
+function js_union($input) {
     return trim(preg_replace([
         // Remove white–space(s) around punctuation(s) [^1]
         '#\s*([!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])\s*#',
@@ -286,6 +286,6 @@ function fn_minify_js_union($input) {
 }
 
 // Set property by file extension
-Minify::_('css', 'fn_minify_css');
-Minify::_('html', 'fn_minify_html');
-Minify::_('js', 'fn_minify_js');
+\Minify::_('css', __NAMESPACE__ . '\css');
+\Minify::_('html', __NAMESPACE__ . '\html');
+\Minify::_('js', __NAMESPACE__ . '\js');
