@@ -7,17 +7,17 @@
  * 2: Remove if/but/when …
  */
 
-function pattern($pattern, $input) {
-    return preg_split('#(' . implode('|', $pattern) . ')#', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+function pattern($pattern, $in) {
+    return preg_split('#(' . implode('|', $pattern) . ')#', $in, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 }
 
-function css($input, $comment = 2, $quote = 2) {
-    if (!is_string($input) || !$input = \n(trim($input))) return $input;
-    $output = $prev = "";
+function css($in, $comment = 2, $quote = 2) {
+    if (!is_string($in) || !$in = \n(trim($in))) return $in;
+    $out = $prev = "";
     foreach (pattern([
         \Minify::COMMENT_CSS,
         \Minify::STRING
-    ], $input) as $part) {
+    ], $in) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && strpos($part, '/*') === 0 && substr($part, -2) === '*/') {
             if (
@@ -30,7 +30,7 @@ function css($input, $comment = 2, $quote = 2) {
                     stripos($part, '@preserve') !== false
                 )
             ) {
-                $output .= $part;
+                $out .= $part;
             }
             continue;
         }
@@ -50,23 +50,23 @@ function css($input, $comment = 2, $quote = 2) {
             ) {
                 $part = $clean;
             }
-            $output .= $part;
+            $out .= $part;
         } else {
-            $output .= css_union($part);
+            $out .= css_union($part);
         }
         $prev = $part;
     }
-    return trim($output);
+    return trim($out);
 }
 
-function css_union($input) {
-    if (stripos($input, 'calc(') !== false) {
+function css_union($in) {
+    if (stripos($in, 'calc(') !== false) {
         // Keep important white–space(s) in `calc()`
-        $input = preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function($m) {
+        $in = preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function($m) {
             return $m[1] . preg_replace('#\s+#', X, $m[2]) . ')';
-        }, $input);
+        }, $in);
     }
-    $input = preg_replace([
+    $in = preg_replace([
         // Fix case for `#foo<space>[bar="baz"]`, `#foo<space>*` and `#foo<space>:first-child` [^1]
         '#(?<=[\w])\s+(\*|\[|:[\w-]+)#',
         // Fix case for `[bar="baz"]<space>.foo`, `*<space>.foo`, `:nth-child(2)<space>.foo` and `@media<space>(foo: bar)<space>and<space>(baz: qux)` [^2]
@@ -117,47 +117,47 @@ function css_union($input) {
         '$1',
         // [^12]
         ' '
-    ], $input);
-    return trim(str_replace(X, ' ', $input));
+    ], $in);
+    return trim(str_replace(X, ' ', $in));
 }
 
-function html($input, $comment = 2, $quote = 1) {
-    if (!is_string($input) || !$input = \n(trim($input))) return $input;
-    $output = $prev = "";
+function html($in, $comment = 2, $quote = 1) {
+    if (!is_string($in) || !$in = \n(trim($in))) return $in;
+    $out = $prev = "";
     foreach (pattern([
         \Minify::COMMENT_HTML,
         \Minify::HTML_KEEP,
         \Minify::HTML,
         \Minify::HTML_ENT
-    ], $input) as $part) {
+    ], $in) as $part) {
         if ($part === "\n") continue;
         if ($part !== ' ' && trim($part) === "" || $comment !== 1 && strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
             if ($comment === 2 && substr($part, -12) === '<![endif]-->') {
-                $output .= $part;
+                $out .= $part;
             }
             continue;
         }
         if ($part[0] === '<' && substr($part, -1) === '>') {
-            $output .= html_union($part, $quote);
+            $out .= html_union($part, $quote);
         } else if ($part[0] === '&' && substr($part, -1) === ';' && $part !== '&lt;' && $part !== '&gt;' && $part !== '&amp;') {
-            $output .= html_entity_decode($part); // Evaluate HTML entit(y|ies)
+            $out .= html_entity_decode($part); // Evaluate HTML entit(y|ies)
         } else {
-            $output .= preg_replace('#\s+#', ' ', $part);
+            $out .= preg_replace('#\s+#', ' ', $part);
         }
         $prev = $part;
     }
     // Force space with `&#x0020;` and line–break with `&#x000A;`
-    return str_ireplace(['&#x0020;', '&#x20;', '&#x000A;', '&#xA;'], [' ', ' ', N, N], trim($output));
+    return str_ireplace(['&#x0020;', '&#x20;', '&#x000A;', '&#xA;'], [' ', ' ', N, N], trim($out));
 }
 
-function html_union($input, $quote) {
+function html_union($in, $quote) {
     global $url;
     if (
-        strpos($input, ' ') === false &&
-        strpos($input, "\n") === false &&
-        strpos($input, "\t") === false
-    ) return $input;
+        strpos($in, ' ') === false &&
+        strpos($in, "\n") === false &&
+        strpos($in, "\t") === false
+    ) return $in;
     return preg_replace_callback('#<\s*([^\/\s]+)\s*(?:>|(\s[^<>]+?)\s*>)#', function($m) use($quote, $url) {
         if (isset($m[2])) {
             // Minify inline CSS(s)
@@ -204,29 +204,29 @@ function html_union($input, $quote) {
             return $quote !== 1 ? html_union_attr($a) : $a;
         }
         return '<' . $m[1] . '>';
-    }, $input);
+    }, $in);
 }
 
-function html_union_attr($input) {
-    if (strpos($input, '=') === false) return $input;
+function html_union_attr($in) {
+    if (strpos($in, '=') === false) return $in;
     return preg_replace_callback('#=(' . \Minify::STRING . ')#', function($m) {
         $q = $m[1][0];
         if (strpos($m[1], ' ') === false && preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $m[1])) {
             return '=' . \t($m[1], $q);
         }
         return $m[0];
-    }, $input);
+    }, $in);
 }
 
-function js($input, $comment = 2, $quote = 2) {
-    if (!is_string($input) || !$input = \n(trim($input))) return $input;
-    $output = $prev = "";
+function js($in, $comment = 2, $quote = 2) {
+    if (!is_string($in) || !$in = \n(trim($in))) return $in;
+    $out = $prev = "";
     foreach (pattern([
         \Minify::COMMENT_CSS,
         \Minify::STRING,
         \Minify::COMMENT_JS,
         \Minify::PATTERN_JS
-    ], $input) as $part) {
+    ], $in) as $part) {
         if (trim($part) === "") continue;
         if ($comment !== 1 && (
             strpos($part, '//') === 0 || // Remove inline comment(s)
@@ -242,28 +242,28 @@ function js($input, $comment = 2, $quote = 2) {
                     stripos($part, '@preserve') !== false
                 )
             ) {
-                $output .= $part;
+                $out .= $part;
             }
             continue;
         }
         if ($part[0] === '/' && (substr($part, -1) === '/' || preg_match('#\/[gimuy]*$#', $part))) {
-            $output .= $part;
+            $out .= $part;
         } else if (
             $part[0] === '"' && substr($part, -1) === '"' ||
             $part[0] === "'" && substr($part, -1) === "'" ||
             $part[0] === '`' && substr($part, -1) === '`' // ES6
         ) {
             // TODO: Remove quote(s) where possible …
-            $output .= $part;
+            $out .= $part;
         } else {
-            $output .= js_union($part);
+            $out .= js_union($part);
         }
         $prev = $part;
     }
-    return $output;
+    return $out;
 }
 
-function js_union($input) {
+function js_union($in) {
     return trim(preg_replace([
         // Remove white–space(s) around punctuation(s) [^1]
         '#\s*([!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])\s*#',
@@ -282,7 +282,7 @@ function js_union($input) {
         '!0', '!1', '$1',
         // [^4]
         '[$1]', '{$1}'
-    ], $input));
+    ], $in));
 }
 
 // Set property by file extension
