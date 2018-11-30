@@ -19,9 +19,9 @@ This extension reduces the page size by removing the unused white-spaces and com
 
 Code | Description
 ---- | -----------
-0 | Remove
-1 | Keep
-2 | Remove if/but/when…
+`0` | Remove
+`1` | Keep
+`2` | Remove if/but/when…
 
 ---
 

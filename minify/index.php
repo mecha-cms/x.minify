@@ -22,4 +22,4 @@ function minify($content) {
     return $content;
 }
 
-\Hook::set('shield.yield', __NAMESPACE__ . '\minify', 2);
+\Hook::set('shield.yield', __NAMESPACE__ . "\\minify", 2);

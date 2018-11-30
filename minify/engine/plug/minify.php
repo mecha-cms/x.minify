@@ -118,7 +118,7 @@ function css_union($in) {
         // [^12]
         ' '
     ], $in);
-    return trim(str_replace(X, ' ', $in));
+    return trim(strtr($in, X, ' '));
 }
 
 function html($in, $comment = 2, $quote = 1) {
@@ -200,7 +200,7 @@ function html_union($in, $quote) {
                 ' $1$2',
                 // [^3]
                 '/'
-            ], str_replace("\n", ' ', $m[2])) . '>';
+            ], strtr($m[2], "\n", ' ')) . '>';
             return $quote !== 1 ? html_union_attr($a) : $a;
         }
         return '<' . $m[1] . '>';
@@ -286,6 +286,6 @@ function js_union($in) {
 }
 
 // Set property by file extension
-\Minify::_('css', __NAMESPACE__ . '\css');
-\Minify::_('html', __NAMESPACE__ . '\html');
-\Minify::_('js', __NAMESPACE__ . '\js');
+\Minify::_('css', __NAMESPACE__ . "\\css");
+\Minify::_('html', __NAMESPACE__ . "\\html");
+\Minify::_('js', __NAMESPACE__ . "\\js");
