@@ -3,7 +3,7 @@ title: Minify
 description: Remove white-spaces and unused comments in HTML, CSS and JavaScript files.
 author: Taufik Nurrohman
 type: Markdown
-version: 2.1.0
+version: 2.1.1
 ...
 
 This extension reduces the page size by removing the unused white-spaces and comments in the HTML output. There is a file named `config.php` in the `lot\state` folder. This file serves to determine how the minifier works.

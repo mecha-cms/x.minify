@@ -8,44 +8,44 @@
  */
 
 function pattern($pattern, $in) {
-    return preg_split('#(' . implode('|', $pattern) . ')#', $in, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    return \preg_split('#(' . \implode('|', $pattern) . ')#', $in, null, \PREG_SPLIT_NO_EMPTY | \PREG_SPLIT_DELIM_CAPTURE);
 }
 
 function css($in, $comment = 2, $quote = 2) {
-    if (!is_string($in) || !$in = \n(trim($in))) return $in;
+    if (!\is_string($in) || !$in = \n(\trim($in))) return $in;
     $out = $prev = "";
     foreach (pattern([
         \Minify::COMMENT_CSS,
         \Minify::STRING
     ], $in) as $part) {
-        if (trim($part) === "") continue;
-        if ($comment !== 1 && strpos($part, '/*') === 0 && substr($part, -2) === '*/') {
+        if (\trim($part) === "") continue;
+        if ($comment !== 1 && \strpos($part, '/*') === 0 && \substr($part, -2) === '*/') {
             if (
                 $comment === 2 && (
                     // Detect special comment(s) from the third character. It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                    isset($part[2]) && strpos('*!', $part[2]) !== false ||
+                    isset($part[2]) && \strpos('*!', $part[2]) !== false ||
                     // Detect license comment(s) from the content. It should contains character(s) like `@license`
-                    stripos($part, '@licence') !== false || // noun
-                    stripos($part, '@license') !== false || // verb
-                    stripos($part, '@preserve') !== false
+                    \stripos($part, '@licence') !== false || // noun
+                    \stripos($part, '@license') !== false || // verb
+                    \stripos($part, '@preserve') !== false
                 )
             ) {
                 $out .= $part;
             }
             continue;
         }
-        if ($part[0] === '"' && substr($part, -1) === '"' || $part[0] === "'" && substr($part, -1) === "'") {
+        if ($part[0] === '"' && \substr($part, -1) === '"' || $part[0] === "'" && \substr($part, -1) === "'") {
             // Remove quote(s) where possible…
             $q = $part[0];
             // Make sure URL does no contains `[ \n\t"']` character(s)
             $clean = \t($part, $q); // Trim quote(s)
-            $ok = strcspn($clean, " \n\t\"'") === strlen($clean);
+            $ok = \strcspn($clean, " \n\t\"'") === \strlen($clean);
             if (
                 $quote !== 1 && (
                     // <https://www.w3.org/TR/CSS2/syndata.html#uri>
-                    substr($prev, -4) === 'url(' && preg_match('#\burl\($#', $prev) && $ok ||
+                    \substr($prev, -4) === 'url(' && \preg_match('#\burl\($#', $prev) && $ok ||
                     // <https://www.w3.org/TR/CSS2/syndata.html#characters>
-                    substr($prev, -1) === '=' && preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $part)
+                    \substr($prev, -1) === '=' && \preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $part)
                 )
             ) {
                 $part = $clean;
@@ -56,17 +56,17 @@ function css($in, $comment = 2, $quote = 2) {
         }
         $prev = $part;
     }
-    return trim($out);
+    return \trim($out);
 }
 
 function css_union($in) {
-    if (stripos($in, 'calc(') !== false) {
+    if (\stripos($in, 'calc(') !== false) {
         // Keep important white–space(s) in `calc()`
-        $in = preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function($m) {
-            return $m[1] . preg_replace('#\s+#', X, $m[2]) . ')';
+        $in = \preg_replace_callback('#\b(calc\()\s*(.*?)\s*\)#i', function($m) {
+            return $m[1] . \preg_replace('#\s+#', X, $m[2]) . ')';
         }, $in);
     }
-    $in = preg_replace([
+    $in = \preg_replace([
         // Fix case for `#foo<space>[bar="baz"]`, `#foo<space>*` and `#foo<space>:first-child` [^1]
         '#(?<=[\w])\s+(\*|\[|:[\w-]+)#',
         // Fix case for `[bar="baz"]<space>.foo`, `*<space>.foo`, `:nth-child(2)<space>.foo` and `@media<space>(foo: bar)<space>and<space>(baz: qux)` [^2]
@@ -118,11 +118,11 @@ function css_union($in) {
         // [^12]
         ' '
     ], $in);
-    return trim(strtr($in, X, ' '));
+    return \trim(\strtr($in, X, ' '));
 }
 
 function html($in, $comment = 2, $quote = 1) {
-    if (!is_string($in) || !$in = \n(trim($in))) return $in;
+    if (!\is_string($in) || !$in = \n(\trim($in))) return $in;
     $out = $prev = "";
     foreach (pattern([
         \Minify::COMMENT_HTML,
@@ -131,45 +131,45 @@ function html($in, $comment = 2, $quote = 1) {
         \Minify::HTML_ENT
     ], $in) as $part) {
         if ($part === "\n") continue;
-        if ($part !== ' ' && trim($part) === "" || $comment !== 1 && strpos($part, '<!--') === 0) {
+        if ($part !== ' ' && \trim($part) === "" || $comment !== 1 && \strpos($part, '<!--') === 0) {
             // Detect IE conditional comment(s) by its closing tag …
-            if ($comment === 2 && substr($part, -12) === '<![endif]-->') {
+            if ($comment === 2 && \substr($part, -12) === '<![endif]-->') {
                 $out .= $part;
             }
             continue;
         }
-        if ($part[0] === '<' && substr($part, -1) === '>') {
+        if ($part[0] === '<' && \substr($part, -1) === '>') {
             $out .= html_union($part, $quote);
-        } else if ($part[0] === '&' && substr($part, -1) === ';' && $part !== '&lt;' && $part !== '&gt;' && $part !== '&amp;') {
-            $out .= html_entity_decode($part); // Evaluate HTML entit(y|ies)
+        } else if ($part[0] === '&' && \substr($part, -1) === ';' && $part !== '&lt;' && $part !== '&gt;' && $part !== '&amp;') {
+            $out .= \html_entity_decode($part); // Evaluate HTML entit(y|ies)
         } else {
-            $out .= preg_replace('#\s+#', ' ', $part);
+            $out .= \preg_replace('#\s+#', ' ', $part);
         }
         $prev = $part;
     }
     // Force space with `&#x0020;` and line–break with `&#x000A;`
-    return str_ireplace(['&#x0020;', '&#x20;', '&#x000A;', '&#xA;'], [' ', ' ', N, N], trim($out));
+    return \str_ireplace(['&#x0020;', '&#x20;', '&#x000A;', '&#xA;'], [' ', ' ', N, N], \trim($out));
 }
 
 function html_union($in, $quote) {
     global $url;
     if (
-        strpos($in, ' ') === false &&
-        strpos($in, "\n") === false &&
-        strpos($in, "\t") === false
+        \strpos($in, ' ') === false &&
+        \strpos($in, "\n") === false &&
+        \strpos($in, "\t") === false
     ) return $in;
-    return preg_replace_callback('#<\s*([^\/\s]+)\s*(?:>|(\s[^<>]+?)\s*>)#', function($m) use($quote, $url) {
+    return \preg_replace_callback('#<\s*([^\/\s]+)\s*(?:>|(\s[^<>]+?)\s*>)#', function($m) use($quote, $url) {
         if (isset($m[2])) {
             // Minify inline CSS(s)
-            if (stripos($m[2], ' style=') !== false) {
-                $m[2] = preg_replace_callback('#( style=)([\'"]?)(.*?)\2#i', function($m) {
+            if (\stripos($m[2], ' style=') !== false) {
+                $m[2] = \preg_replace_callback('#( style=)([\'"]?)(.*?)\2#i', function($m) {
                     return $m[1] . $m[2] . css($m[3]) . $m[2];
                 }, $m[2]);
             }
             // Minify URL(s)
-            if (strpos($m[2], '://') !== false) {
+            if (\strpos($m[2], '://') !== false) {
                 $host = $url->protocol . $url->host;
-                $m[2] = str_replace([
+                $m[2] = \str_replace([
                     $host . '/',
                     $host . '?',
                     $host . '&',
@@ -186,7 +186,7 @@ function html_union($in, $quote) {
                 ], $m[2]);
             }
             $a = 'a(sync|uto(focus|play))|c(hecked|ontrols)|d(efer|isabled)|hidden|ismap|loop|multiple|open|re(adonly|quired)|s((cop|elect)ed|pellcheck)';
-            $a = '<' . $m[1] . preg_replace([
+            $a = '<' . $m[1] . \preg_replace([
                 // From `a="a"`, `a='a'`, `a="true"`, `a='true'`, `a=""` and `a=''` to `a` [^1]
                 '#\s(' . $a . ')(?:=([\'"]?)(?:true|\1)?\2)#i',
                 // Remove extra white–space(s) between HTML attribute(s) [^2]
@@ -200,7 +200,7 @@ function html_union($in, $quote) {
                 ' $1$2',
                 // [^3]
                 '/'
-            ], strtr($m[2], "\n", ' ')) . '>';
+            ], \strtr($m[2], "\n", ' ')) . '>';
             return $quote !== 1 ? html_union_attr($a) : $a;
         }
         return '<' . $m[1] . '>';
@@ -208,10 +208,10 @@ function html_union($in, $quote) {
 }
 
 function html_union_attr($in) {
-    if (strpos($in, '=') === false) return $in;
-    return preg_replace_callback('#=(' . \Minify::STRING . ')#', function($m) {
+    if (\strpos($in, '=') === false) return $in;
+    return \preg_replace_callback('#=(' . \Minify::STRING . ')#', function($m) {
         $q = $m[1][0];
-        if (strpos($m[1], ' ') === false && preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $m[1])) {
+        if (\strpos($m[1], ' ') === false && \preg_match('#^' . $q . '[a-zA-Z_][\w-]*?' . $q . '$#', $m[1])) {
             return '=' . \t($m[1], $q);
         }
         return $m[0];
@@ -219,7 +219,7 @@ function html_union_attr($in) {
 }
 
 function js($in, $comment = 2, $quote = 2) {
-    if (!is_string($in) || !$in = \n(trim($in))) return $in;
+    if (!\is_string($in) || !$in = \n(\trim($in))) return $in;
     $out = $prev = "";
     foreach (pattern([
         \Minify::COMMENT_CSS,
@@ -227,31 +227,31 @@ function js($in, $comment = 2, $quote = 2) {
         \Minify::COMMENT_JS,
         \Minify::PATTERN_JS
     ], $in) as $part) {
-        if (trim($part) === "") continue;
+        if (\trim($part) === "") continue;
         if ($comment !== 1 && (
-            strpos($part, '//') === 0 || // Remove inline comment(s)
-            strpos($part, '/*') === 0 && substr($part, -2) === '*/'
+            \strpos($part, '//') === 0 || // Remove inline comment(s)
+            \strpos($part, '/*') === 0 && \substr($part, -2) === '*/'
         )) {
             if (
                 $comment === 2 && (
                     // Detect special comment(s) from the third character. It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                    isset($part[2]) && strpos('*!', $part[2]) !== false ||
+                    isset($part[2]) && \strpos('*!', $part[2]) !== false ||
                     // Detect license comment(s) from the content. It should contains character(s) like `@license`
-                    stripos($part, '@licence') !== false || // noun
-                    stripos($part, '@license') !== false || // verb
-                    stripos($part, '@preserve') !== false
+                    \stripos($part, '@licence') !== false || // noun
+                    \stripos($part, '@license') !== false || // verb
+                    \stripos($part, '@preserve') !== false
                 )
             ) {
                 $out .= $part;
             }
             continue;
         }
-        if ($part[0] === '/' && (substr($part, -1) === '/' || preg_match('#\/[gimuy]*$#', $part))) {
+        if ($part[0] === '/' && (\substr($part, -1) === '/' || \preg_match('#\/[gimuy]*$#', $part))) {
             $out .= $part;
         } else if (
-            $part[0] === '"' && substr($part, -1) === '"' ||
-            $part[0] === "'" && substr($part, -1) === "'" ||
-            $part[0] === '`' && substr($part, -1) === '`' // ES6
+            $part[0] === '"' && \substr($part, -1) === '"' ||
+            $part[0] === "'" && \substr($part, -1) === "'" ||
+            $part[0] === '`' && \substr($part, -1) === '`' // ES6
         ) {
             // TODO: Remove quote(s) where possible …
             $out .= $part;
@@ -264,7 +264,7 @@ function js($in, $comment = 2, $quote = 2) {
 }
 
 function js_union($in) {
-    return trim(preg_replace([
+    return \trim(\preg_replace([
         // Remove white–space(s) around punctuation(s) [^1]
         '#\s*([!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])\s*#',
         // Remove the last semi–colon and comma [^2]
