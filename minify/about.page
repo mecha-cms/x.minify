@@ -3,17 +3,19 @@ title: Minify
 description: Remove white-spaces and unused comments in HTML, CSS and JavaScript files.
 author: Taufik Nurrohman
 type: Markdown
-version: 2.1.1
+version: 2.2.0
 ...
 
-This extension reduces the page size by removing the unused white-spaces and comments in the HTML output. There is a file named `config.php` in the `lot\state` folder. This file serves to determine how the minifier works.
+This extension reduces the page size by removing the unused white-spaces and comments in the HTML output. There is a file named `config.php` in the `.\lot\extend\minify\lot\state` folder. This file serves to determine how the minifier works by default.
 
 ~~~ .php
 // `Minify::{$any}($input, $comment, $quote)`
 [
-    'css' => [2, 2], // `[$comment, $quote]`
-    'html' => [2, 1],
-    'js' => [2, 2]
+    '.css' => [2, 2], // `[$comment, $quote]`
+    '.html' => [2, 1],
+    '.js' => [2],
+    '.json' => [],
+    '.php' => []
 ]
 ~~~
 
@@ -23,6 +25,8 @@ Code | Description
 `1` | Keep
 `2` | Remove if/but/when…
 
+> **Note:** There are no such `0` option for `$quote`.
+
 ---
 
 ### Usage
@@ -30,13 +34,13 @@ Code | Description
 #### HTML
 
 ~~~ .xmp.php
-Minify::html($input, $comment = 2, $quote = 1);
+Minify::HTML(string $in, int $comment = 2, int $quote = 1): string;
 ~~~
 
 Minify HTML string:
 
 ~~~ .php
-echo Minify::html('<!DOCTYPE html>
+echo Minify::HTML('<!DOCTYPE html>
 <html dir="ltr">
   <head>
     <meta charset="utf-8">
@@ -56,13 +60,13 @@ echo Minify::html('<!DOCTYPE html>
 #### CSS
 
 ~~~ .xmp.php
-Minify::css($input, $comment = 2, $quote = 0);
+Minify::CSS(string $in, int $comment = 2, int $quote = 2): string;
 ~~~
 
 Minify CSS string:
 
 ~~~ .php
-echo Minify::css('* {
+echo Minify::CSS('* {
   margin: 0;
   padding: 0;
   font: inherit;
@@ -93,17 +97,29 @@ html {
 #### JS
 
 ~~~ .xmp.php
-Minify::js($input, $comment = 2);
+Minify::JS(string $in, int $comment = 2): string;
 ~~~
 
 Minify JavaScript string:
 
 ~~~ .php
-echo Minify::js('var i, j, k = Date.now();
+echo Minify::JS('var i, j, k = Date.now();
 
 for (i = 0, j = k; i < k; ++i) {
     console.log("bark: " + i);
 }');
+~~~
+
+#### JSON
+
+~~~ .xmp.php
+Minify::JSON(string $in): string;
+~~~
+
+#### PHP
+
+~~~ .xmp.php
+Minify::PHP(string $in): string;
 ~~~
 
 ---
@@ -112,8 +128,8 @@ for (i = 0, j = k; i < k; ++i) {
 
 Parameter | Description
 --------- | -----------
-`$input` | The string input to be minified.
+`$in` | The string input to be minified.
 `$comment` | The `$comment` parameter value consists of `0`, `1` and `2`. `0` means remove all comments, `1` means preserve all comments, `2` means remove all comments except special comments like IE conditional comments or license comments.
-`$quote` | The `$quote` parameter value consists of `0` and `1`. `0` means remove quotes where possible, `1` means preserve all quotes.
+`$quote` | The `$quote` parameter value consists of `1` and `2`. `1` means preserve all quotes, `2` means remove quotes where possible.
 
 <!-- block:donate -->
