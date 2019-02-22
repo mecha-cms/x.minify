@@ -93,7 +93,7 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
         }
         $v = trim($tok);
         // It is possible to right-trim the result if last character is a `}`, `:` or `,`
-        $t = $out === "" || strpos('}:;,', substr($out, -1)) !== false;
+        $t = $out === "" || false !== strpos('}:;,', substr($out, -1));
         // White-space only, skip!
         if ($v === "") {
             // Do nothing!
