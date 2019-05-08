@@ -1,4 +1,4 @@
-<?php namespace fn;
+<?php namespace _;
 
 function minify($content) {
     return \Minify::HTML($content);
