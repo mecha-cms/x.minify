@@ -25,7 +25,7 @@ Code | Description
 `1` | Keep
 `2` | Remove if/but/when…
 
-> **Note:** There are no such `0` option for `$quote`.
+> **Note:** There is no such `0` option for `$quote`.
 
 ---
 
