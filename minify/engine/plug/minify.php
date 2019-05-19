@@ -551,7 +551,7 @@ $php = function(string $in): string {
     return $out;
 };
 
-$state = Extend::state('minify');
+$state = extend('minify');
 array_unshift($state['.css'], "");
 array_unshift($state['.html'], "");
 array_unshift($state['.js'], "");
