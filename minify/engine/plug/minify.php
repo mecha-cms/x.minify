@@ -86,16 +86,16 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
             strpos($v, "'") === 0 && substr($v, -1) === "'"
         ) {
             // Remove quote(s) where possible
-            if ($quote === 2 && !is_numeric($v[1]) && preg_match('#^([\'"])(' . $KEY . ')\1$#i', $v, $m)) {
+            if ($quote === 2 && !is_numeric($v[1]) && preg_match('/^([\'"])(' . $KEY . ')\1$/i', $v, $m)) {
                 $v = $m[2];
             }
             $out .= $v;
         // Maybe an attribute selector(s)
         } else if ($v[0] === '[' && substr($v, -1) === ']') {
-            $out .= preg_replace_callback('#=(' . $S . ')\s*([is])?#', function($m) use($KEY, $quote) {
+            $out .= preg_replace_callback('/=(' . $S . ')\s*([is])?/', function($m) use($KEY, $quote) {
                 // Remove quote(s) where possible
                 $v = $m[1];
-                $v = $quote === 2 && !is_numeric($v[1]) && preg_match('#^([\'"])(' . $KEY . ')\1$#i', $v, $w) ? $w[2] : preg_replace('#([\'"])(.*?)\1#', '"$2"', $v);
+                $v = $quote === 2 && !is_numeric($v[1]) && preg_match('/^([\'"])(' . $KEY . ')\1$/i', $v, $w) ? $w[2] : preg_replace('/([\'"])(.*?)\1/', '"$2"', $v);
                 // Must return `[foo="bar"i]` or `[foo=bar i]`
                 return trim('=' . $v . ($v[0] === '"' || $v[0] === "'" ? "" : ' ') . ($m[2] ?? ""));
             }, $tok);
@@ -260,7 +260,7 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
                 $tok = $html_content($tok, 'pre');
             // Minify embedded JS code
             } else if (substr($v, -9) === '</script>') {
-                $fn = strpos($v, ' type=') !== false && preg_match('# type=([\'"])(application/json)\1[ >]#', $v) ? $json : $js;
+                $fn = strpos($v, ' type=') !== false && preg_match('/ type=([\'"])(application\/json)\1[ >]/', $v) ? $json : $js;
                 $tok = $html_content($tok, 'script', $fn);
             // Minify embedded CSS code
             } else if (substr($v, -8) === '</style>') {
@@ -284,6 +284,7 @@ $html_content = function(string $in, string $t, $fn = false): string {
 
 $html_data = function(string $in, int $quote) use(
     &$KEY,
+    &$STRING,
     &$URL,
     &$css
 ): string {
@@ -292,6 +293,7 @@ $html_data = function(string $in, int $quote) use(
         strpos($in, "\n") === false &&
         strpos($in, "\t") === false
     ) ? $in : preg_replace_callback('#<([^>/\s]+)\s*(\s[^>]+?)?\s*>#', function($m) use(
+        $STRING,
         $URL,
         $css,
         $quote
@@ -300,8 +302,9 @@ $html_data = function(string $in, int $quote) use(
         if (isset($m[2])) {
             // Minify CSS inline code
             if (strpos($m[2], ' style=') !== false) {
-                $m[2] = preg_replace_callback('#( style=)([\'"]?)(.*?)\2#', function($m) use($css) {
-                    return $m[1] . $m[2] . $css($m[3]) . $m[2];
+                $m[2] = preg_replace_callback('#( style=)(' . $STRING() . ')#', function($m) use($css) {
+                    $q = $m[2][0];
+                    return $m[1] . $q . $css(substr($m[2], 1, -1)) . $q;
                 }, $m[2]);
             }
             // Minify URL in attribute value
@@ -398,7 +401,7 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
         ) {
             $out .= $tok;
         // Maybe a pattern
-        } else if ($tok[0] === '/' && preg_match('#^/.+/[a-z]*[;,.\s]$#', $tok)) {
+        } else if ($tok[0] === '/' && preg_match('/^\/.+\/[a-z]*[;,.\s]$/', $tok)) {
             $out .= trim($tok);
         } else if (is_numeric($tok)) {
             $tok = strpos($tok, '-') === 0 ? '-' . ltrim(substr($tok, 1), '0') : ltrim($tok, '0');
@@ -551,7 +554,7 @@ $php = function(string $in): string {
     return $out;
 };
 
-$state = extension('minify');
+$state = state('minify');
 array_unshift($state['.css'], "");
 array_unshift($state['.html'], "");
 array_unshift($state['.js'], "");

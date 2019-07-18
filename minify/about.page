@@ -3,7 +3,10 @@ title: Minify
 description: Remove white-spaces and unused comments in HTML, CSS and JavaScript files.
 author: Taufik Nurrohman
 type: Markdown
-version: 2.4.0
+version: 2.4.1
+
+use:
+  '.\lot\x\content': 0
 ...
 
 This extension reduces the page size by removing the unused white-spaces and comments in the HTML output. There is a file named `config.php` in the `.\lot\extend\minify\lot\state` folder. This file serves to determine how the minifier works by default.
@@ -131,5 +134,3 @@ Parameter | Description
 `$in` | The string input to be minified.
 `$comment` | The `$comment` parameter value consists of `0`, `1` and `2`. `0` means remove all comments, `1` means preserve all comments, `2` means remove all comments except special comments like IE conditional comments or license comments.
 `$quote` | The `$quote` parameter value consists of `1` and `2`. `1` means preserve all quotes, `2` means remove quotes where possible.
-
-<!-- block:donate -->
