@@ -12,7 +12,7 @@ $STRING = function(string $limit = '\'"', string $not = ""): string {
 // List of common token(s) in code
 $TOKEN = '(?:[!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])';
 // Define root URL to be removed
-$URL = $GLOBALS['URL']['scheme'] . '://' . $GLOBALS['URL']['host'];
+$URL = $url->ground;
 
 // Generate XML tag pattern
 $XML = function(string $tag, string $end = '>', $wrap = true): string {
