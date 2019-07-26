@@ -18,7 +18,7 @@ $URL = $url->ground;
 $XML = function(string $tag, string $end = '>', $wrap = true): string {
     // <https://www.w3.org/TR/html5/syntax.html#elements-attributes>
     $tag = '(?:' . $tag . ')';
-    return '(?:<' . $tag . '(?:\s[^>]*)?' . $end . ($wrap ? '[\s\S]*?</' . $tag . '>' : "") . ')';
+    return '(?:<' . $tag . '(?:\s[^>]*)?' . $end . ($wrap ? '[\s\S]*?<\/' . $tag . '>' : "") . ')';
 };
 
 $css = function(string $in, int $comment = 2, int $quote = 2) use(
@@ -38,12 +38,12 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
     // prevent `span [title]` being minified into `span[title]`
     $ATTR = '(?:\s?\[' . $KEY . '(?:=.*?)?\]\s?)';
     // Match CSS comment
-    $COMMENT = '(?:/\*[\s\S]*?\*/)';
+    $COMMENT = '(?:\/\*[\s\S]*?\*\/)';
     // Match CSS string
     $S = $STRING('\'"', '\n');
     $out = "";
     $t = false;
-    foreach (preg_split('#(' .
+    foreach (preg_split('/(' .
         // Prioritize string over comment because string cannot contains `\n` character
         $S . '|' .
         $COMMENT . '|' .
@@ -51,7 +51,7 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
         $ATTR . '|' .
         // Exclude `%`, `-` and '.' from token list
         str_replace(['%', '\-', '.'], "", $TOKEN) .
-    ')#i', n($in), null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $tok) {
+    ')/i', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
         if (strpos($tok, '/*') === 0 && substr($tok, -2) === '*/') {
             if (
                 $comment === 1 || (
@@ -145,27 +145,27 @@ $css_minify = function(string $in) use(
     // Match character(s) from `var(` to `)`
     $VAR = '(?:\s?\bvar\([^}:;,]+\)\s?)';
     $out = "";
-    foreach (\preg_split('#(' .
+    foreach (\preg_split('/(' .
         // Prioritize CSS function over pseudo selector to prevent `:calc`, `:var` match
         $CALC . '|' .
         $VAR . '|' .
         $U . '|' .
         $PSEUDO . '|' .
         $HEX .
-    ')#i', $in, null, \PREG_SPLIT_NO_EMPTY | \PREG_SPLIT_DELIM_CAPTURE) as $tok) {
+    ')/i', $in, null, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY) as $tok) {
         $v = trim($tok);
         // White-space only, skip!
         if ($v === "") {
             // Do nothing!
         // Maybe a calculation
         } else if (strpos($v, 'calc(') === 0) {
-            $out .= $css_unit(preg_replace(['#\s+#', '#\s*([\(\)])\s*#'], [' ', '$1'], $tok));
+            $out .= $css_unit(preg_replace(['/\s+/', '/\s*([\(\)])\s*/'], [' ', '$1'], $tok));
         // Maybe a variable
         } else if (strpos($v, 'var(') === 0) {
-            $out .= $css_unit(preg_replace('#\s*,\s*#', ',', $tok));
+            $out .= $css_unit(preg_replace('/\s*,\s*/', ',', $tok));
         // Maybe a URL function
         } else if (strpos($v, 'src(') === 0 || strpos($v, 'url(') === 0) {
-            $tok = preg_replace_callback('#\s*(' . $S . ')\s*#', function($m) use($URL, $quote) {
+            $tok = preg_replace_callback('/\s*(' . $S . ')\s*/', function($m) use($URL, $quote) {
                 $v = substr(substr($m[1], 1), 0, -1);
                 $v = str_replace($URL, "", $v); // Minify URL
                 // Remove quote(s) where possible
@@ -175,7 +175,7 @@ $css_minify = function(string $in) use(
         // Maybe a HEX color code
         } else if (strpos($v, '#') === 0 && (strlen($v) === 4 || strlen($v) === 7) && ctype_xdigit(substr($v, 1))) {
             // Minify HEX color code
-            $out .= preg_replace('#([a-f\d])\1([a-f\d])\2([a-f\d])\3#i', '$1$2$3', strtolower($tok));
+            $out .= preg_replace('/([a-f\d])\1([a-f\d])\2([a-f\d])\3/i', '$1$2$3', strtolower($tok));
         // Maybe a pseudo and class selector or a value with its `:` prefix
         } else if (strpos(':.', $v[0]) !== false) {
             $out .= $tok;
@@ -184,10 +184,10 @@ $css_minify = function(string $in) use(
         }
     }
     return preg_replace([
-        '#\s+#',
-        '#:0(?: 0){1,3}([};,])#',
-        '#\bbackground:(?:none|0)\b#',
-        '#\b(border(?:-radius)?|outline):none\b#'
+        '/\s+/',
+        '/:0(?: 0){1,3}([};,])/',
+        '/\bbackground:(?:none|0)\b/',
+        '/\b(border(?:-radius)?|outline):none\b/'
     ], [
         ' ',
         ':0$1',
@@ -197,9 +197,9 @@ $css_minify = function(string $in) use(
 };
 
 $css_unit = function(string $in) use(&$NUMBER): string {
-    $out = preg_replace('#\s+#', ' ', $in);
+    $out = preg_replace('/\s+/', ' ', $in);
     // Minify unit(s)
-    return preg_replace_callback('#(' . $NUMBER . ')(%|Hz|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|in|kHz|mm|ms|pc|pt|px|rad|rem|s|turn|vh|vmax|vmin|vw)\b#', function($m) {
+    return preg_replace_callback('/(' . $NUMBER . ')(%|Hz|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|in|kHz|mm|ms|pc|pt|px|rad|rem|s|turn|vh|vmax|vmin|vw)\b/', function($m) {
         $v = $m[1];
         $v = strpos($v, '-') === 0 ? '-' . ltrim(substr($v, 1), '0') : ltrim($v, '0');
         $v = strpos($v, '.') === 0 ? trim($v, '0') : $v;
@@ -231,13 +231,13 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
         '|' . $XML('style') .
         '|' . $XML('textarea') . ')';
     $out = "";
-    foreach (preg_split('#(' .
+    foreach (preg_split('/(' .
         $COMMENT . '|' .
         $KEEP . '|' .
         // Match any HTML tag(s) include `<!DOCTYPE foo>` and `</foo>`
-        $XML('[!/]?[\w:-]+', '>', false) . '|' .
+        $XML('[!\/]?[\w:-]+', '>', false) . '|' .
         $ENT .
-    ')#i', n($in), null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $tok) {
+    ')/i', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
         $v = trim($tok);
         if ($tok === ' ') {
             // Fix case for `<button>Foo</button> <button>Bar</button>`
@@ -277,7 +277,7 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
 };
 
 $html_content = function(string $in, string $t, $fn = false): string {
-    return preg_replace_callback('#<' . $t . '(\s[^>]*)?>\s*([\s\S]*?)\s*</' . $t . '>#', function($m) use($fn, $t) {
+    return preg_replace_callback('/<' . $t . '(\s[^>]*)?>\s*([\s\S]*?)\s*<\/' . $t . '>/', function($m) use($fn, $t) {
         return '<' . $t . $m[1] . '>' . ($fn ? $fn($m[2]) : $m[2]) . '</' . $t . '>';
     }, $in);
 };
@@ -292,7 +292,7 @@ $html_data = function(string $in, int $quote) use(
         strpos($in, ' ') === false &&
         strpos($in, "\n") === false &&
         strpos($in, "\t") === false
-    ) ? $in : preg_replace_callback('#<([^>/\s]+)\s*(\s[^>]+?)?\s*>#', function($m) use(
+    ) ? $in : preg_replace_callback('/<([^>\/\s]+)\s*(\s[^>]+?)?\s*>/', function($m) use(
         $STRING,
         $URL,
         $css,
@@ -302,7 +302,7 @@ $html_data = function(string $in, int $quote) use(
         if (isset($m[2])) {
             // Minify CSS inline code
             if (strpos($m[2], ' style=') !== false) {
-                $m[2] = preg_replace_callback('#( style=)(' . $STRING() . ')#', function($m) use($css) {
+                $m[2] = preg_replace_callback('/( style=)(' . $STRING() . ')/', function($m) use($css) {
                     $q = $m[2][0];
                     return $m[1] . $q . $css(substr($m[2], 1, -1)) . $q;
                 }, $m[2]);
@@ -323,11 +323,11 @@ $html_data = function(string $in, int $quote) use(
             }
             $out = '<' . $m[1] . preg_replace([
                 // From `a="a"`, `a='a'`, `a="true"`, `a='true'`, `a=""` and `a=''` to `a` [^1]
-                '#\s(a(sync|uto(focus|play))|c(hecked|ontrols)|d(efer|isabled)|hidden|ismap|loop|multiple|open|re(adonly|quired)|s((cop|elect)ed|pellcheck))(?:=([\'"]?)(?:true|\1)?\2)#',
+                '/\s(a(sync|uto(focus|play))|c(hecked|ontrols)|d(efer|isabled)|hidden|ismap|loop|multiple|open|re(adonly|quired)|s((cop|elect)ed|pellcheck))(?:=([\'"]?)(?:true|\1)?\2)/',
                 // Remove extra white–space(s) between HTML attribute(s) [^2]
-                '#\s*([^\s=]+)(=(?:\S+|([\'"]?).*?\3)|$)#',
+                '/\s*([^\s=]+)(=(?:\S+|([\'"]?).*?\3)|$)/',
                 // From `<foo />` to `<foo/>` [^3]
-                '#\s+\/$#'
+                '/\s+\/$/'
             ], [
                 // [^1]
                 ' $1',
@@ -336,7 +336,7 @@ $html_data = function(string $in, int $quote) use(
                 // [^3]
                 '/'
             ], strtr($m[2], "\n", ' ')) . '>';
-            return $quote === 2 ? preg_replace('#=([\'"])(' . $KEY . ')\1#i', '=$2', $out) : $out;
+            return $quote === 2 ? preg_replace('/=([\'"])(' . $KEY . ')\1/i', '=$2', $out) : $out;
         }
         return '<' . $m[1] . '>';
     }, $in);
@@ -356,10 +356,10 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
     $COMMENT_DOC = '/\*[\s\S]*?\*/';
     $KEY = '[a-z$_][a-z\d$_]*';
     $LITERAL = '\b(?:true|false)\b';
-    $REGEX = '(?:' . $STRING('/', '\n') . '[gimuy]*[;,.\s])';
+    $REGEX = '(?:' . $STRING('\/', '\n') . '[gimuy]*[;,.\s])';
     $K = ['true' => '!0', 'false' => '!1'];
     $out = "";
-    foreach (preg_split('#\s*(' .
+    foreach (preg_split('/\s*(' .
         // Match `'foo bar'`, `"foo bar"`
         $STRING('\'"', '\n') . '|' .
         $COMMENT_DOC . '|' .
@@ -370,7 +370,7 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
         '\b' . $NUMBER . '\b|' .
         $LITERAL . '|' .
         $TOKEN .
-    ')\s*#', n($in), null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $tok) {
+    ')\s*/', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
         if (strpos($tok, '//') === 0) {
             continue; // Is a comment, skip!
         }
@@ -419,9 +419,9 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
     }
     return $quote !== 1 ? preg_replace([
         // Minify object property [^1]
-        '#([{,])([\'"])(' . $KEY . ')\2:#',
+        '/([{,])([\'"])(' . $KEY . ')\2:/',
         // Minify object access [^2]
-        '#(' . $KEY . '|\])\[([\'"])(' . $KEY . ')\2\]#'
+        '/(' . $KEY . '|\])\[([\'"])(' . $KEY . ')\2\]/'
     ], [
         // [^1]
         '$1$3:',
