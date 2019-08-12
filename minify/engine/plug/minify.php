@@ -351,12 +351,12 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
         return "";
     }
     // Match JS comment inline
-    $COMMENT = '//[^\n]*';
+    $COMMENT = '(?:\/\/[^\n]*)';
     // Match JS comment block
-    $COMMENT_DOC = '/\*[\s\S]*?\*/';
-    $KEY = '[a-z$_][a-z\d$_]*';
-    $LITERAL = '\b(?:true|false)\b';
-    $REGEX = '(?:' . $STRING('\/', '\n') . '[gimuy]*[;,.\s])';
+    $COMMENT_DOC = '(?:\/\*[\s\S]*?\*\/)';
+    $KEY = '(?:[a-z$_][a-z\d$_]*)';
+    $LITERAL = '(?:\b(?:true|false)\b)';
+    $REGEX = '(?:' . strtr($STRING('/', '\n'), ['/' => "\\/"]) . '[gimuy]*[;,.\s])';
     $K = ['true' => '!0', 'false' => '!1'];
     $out = "";
     foreach (preg_split('/\s*(' .
