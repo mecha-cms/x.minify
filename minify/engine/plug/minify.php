@@ -473,7 +473,7 @@ $php = function(string $in): string {
         T_XOR_EQUAL => 1                 // ^=
     ];
     $c = count($toks = token_get_all($in));
-    $doc = $minify = false;
+    $doc = $state = false;
     $begin = $end = null;
     for ($i = 0; $i < $c; ++$i) {
         $tok = $toks[$i];
@@ -482,7 +482,7 @@ $php = function(string $in): string {
             $value = $tok[1];
             if ($id === T_INLINE_HTML) {
                 $out .= $value;
-                $minify = false;
+                $state = false;
             } else {
                 if ($id === T_OPEN_TAG) {
                     if (strpos($value, ' ') !== false || strpos($value, "\n") !== false || strpos($value, "\t") !== false || strpos($value, "\r") !== false) {
@@ -490,11 +490,11 @@ $php = function(string $in): string {
                     }
                     $out .= $value . ' ';
                     $begin = T_OPEN_TAG;
-                    $minify = true;
+                    $state = true;
                 } else if ($id === T_OPEN_TAG_WITH_ECHO) {
                     $out .= $value;
                     $begin = T_OPEN_TAG_WITH_ECHO;
-                    $minify = true;
+                    $state = true;
                 } else if ($id === T_CLOSE_TAG) {
                     if ($begin == T_OPEN_TAG_WITH_ECHO) {
                         $out = rtrim($out, '; ');
@@ -503,29 +503,29 @@ $php = function(string $in): string {
                     }
                     $out .= $value;
                     $begin = null;
-                    $minify = false;
+                    $state = false;
                 } else if (isset($t[$id])) {
                     $out .= $value;
-                    $minify = true;
+                    $state = true;
                 } else if ($id === T_ENCAPSED_AND_WHITESPACE || $id === T_CONSTANT_ENCAPSED_STRING) {
                     if ($value[0] === '"') {
                         $value = addcslashes($value, "\n\r\t");
                     }
                     $out .= $value;
-                    $minify = true;
+                    $state = true;
                 } else if ($id === T_WHITESPACE) {
                     $n = $toks[$i + 1] ?? null;
-                    if(!$minify && (!is_string($n) || $n === '$') && !isset($t[$n[0]])) {
+                    if(!$state && (!is_string($n) || $n === '$') && !isset($t[$n[0]])) {
                         $out .= ' ';
                     }
-                    $minify = false;
+                    $state = false;
                 } else if ($id === T_START_HEREDOC) {
                     $out .= "<<<S\n";
-                    $minify = false;
+                    $state = false;
                     $doc = true; // Enter HEREDOC
                 } elseif($id === T_END_HEREDOC) {
                     $out .= 'S;';
-                    $minify = true;
+                    $state = true;
                     $doc = false; // Exit HEREDOC
                     for ($j = $i + 1; $j < $c; ++$j) {
                         if (is_string($toks[$j]) && $toks[$j] === ';') {
@@ -536,10 +536,10 @@ $php = function(string $in): string {
                         }
                     }
                 } else if ($id === T_COMMENT || $id === T_DOC_COMMENT) {
-                    $minify = true;
+                    $state = true;
                 } else {
                     $out .= $value;
-                    $minify = false;
+                    $state = false;
                 }
             }
             $end = "";
@@ -548,13 +548,13 @@ $php = function(string $in): string {
                 $out .= $tok;
                 $end = $tok;
             }
-            $minify = true;
+            $state = true;
         }
     }
     return $out;
 };
 
-$state = state('minify');
+$state = State::get('x.minify', true);
 array_unshift($state['.css'], "");
 array_unshift($state['.html'], "");
 array_unshift($state['.js'], "");
