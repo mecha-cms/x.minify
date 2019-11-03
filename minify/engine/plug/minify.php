@@ -26,7 +26,7 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
     &$TOKEN,
     &$css_minify
 ): string {
-    if (($in = trim($in)) === "") {
+    if ("" === ($in = trim($in))) {
         return "";
     }
     // Preserve single white-space around `*` selector to
@@ -52,18 +52,18 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
         // Exclude `%`, `-` and '.' from token list
         str_replace(['%', '\-', '.'], "", $TOKEN) .
     ')/i', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
-        if (strpos($tok, '/*') === 0 && substr($tok, -2) === '*/') {
+        if (0 === strpos($tok, '/*') && '*/' === substr($tok, -2)) {
             if (
-                $comment === 1 || (
-                    $comment === 2 && (
+                1 === $comment || (
+                    2 === $comment && (
                         // Detect special comment(s) from the third character
                         // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                        strpos('!*', $tok[2]) !== false ||
+                        false !== strpos('!*', $tok[2]) ||
                         // Detect license comment(s) from the content
                         // It should contains character(s) like `@license`
-                        strpos($tok, '@licence') !== false || // noun
-                        strpos($tok, '@license') !== false || // verb
-                        strpos($tok, '@preserve') !== false
+                        false !== strpos($tok, '@licence') || // noun
+                        false !== strpos($tok, '@license') || // verb
+                        false !== strpos($tok, '@preserve')
                     )
                 )
             ) {
@@ -74,42 +74,42 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
         }
         $v = trim($tok);
         // It is possible to right-trim the result if last character is a `}`, `:` or `,`
-        $t = $out === "" || false !== strpos('}:;,', substr($out, -1));
+        $t = "" === $out || false !== strpos('}:;,', substr($out, -1));
         // White-space only, skip!
-        if ($v === "") {
+        if ("" === $v) {
             // Do nothing!
-        } else if ($v === '*') {
+        } else if ('*' === $v) {
             $out .= $tok;
         // String block, don’t touch!
         } else if (
-            strpos($v, '"') === 0 && substr($v, -1) === '"' ||
-            strpos($v, "'") === 0 && substr($v, -1) === "'"
+            0 === strpos($v, '"') && '"' === substr($v, -1) ||
+            0 === strpos($v, "'") && "'" === substr($v, -1)
         ) {
             // Remove quote(s) where possible
-            if ($quote === 2 && !is_numeric($v[1]) && preg_match('/^([\'"])(' . $KEY . ')\1$/i', $v, $m)) {
+            if (2 === $quote && !is_numeric($v[1]) && preg_match('/^([\'"])(' . $KEY . ')\1$/i', $v, $m)) {
                 $v = $m[2];
             }
             $out .= $v;
         // Maybe an attribute selector(s)
-        } else if ($v[0] === '[' && substr($v, -1) === ']') {
+        } else if ('[' === $v[0] && ']' === substr($v, -1)) {
             $out .= preg_replace_callback('/=(' . $S . ')\s*([is])?/', function($m) use($KEY, $quote) {
                 // Remove quote(s) where possible
                 $v = $m[1];
-                $v = $quote === 2 && !is_numeric($v[1]) && preg_match('/^([\'"])(' . $KEY . ')\1$/i', $v, $w) ? $w[2] : preg_replace('/([\'"])(.*?)\1/', '"$2"', $v);
+                $v = 2 === $quote && !is_numeric($v[1]) && preg_match('/^([\'"])(' . $KEY . ')\1$/i', $v, $w) ? $w[2] : preg_replace('/([\'"])(.*?)\1/', '"$2"', $v);
                 // Must return `[foo="bar"i]` or `[foo=bar i]`
-                return trim('=' . $v . ($v[0] === '"' || $v[0] === "'" ? "" : ' ') . ($m[2] ?? ""));
+                return trim('=' . $v . ('"' === $v[0] || "'" === $v[0] ? "" : ' ') . ($m[2] ?? ""));
             }, $tok);
         // Remove last `,` if token is `)`
-        } else if ($tok === ')') {
+        } else if (')' === $tok) {
             $out = rtrim($out, ',') . $tok;
         // Remove last white-space if token is `{`
-        } else if ($tok === '{') {
+        } else if ('{' === $tok) {
             $out = rtrim($out) . $tok;
         // Remove last `;` if token is `}`
-        } else if ($tok === '}') {
+        } else if ('}' === $tok) {
             $out = rtrim($out, ';') . $tok;
             // Remove empty selector
-            if (substr($out, -2) === '{}') {
+            if ('{}' === substr($out, -2)) {
                 $out = explode('}', $out);
                 array_pop($out);
                 array_pop($out);
@@ -155,29 +155,29 @@ $css_minify = function(string $in) use(
     ')/i', $in, null, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY) as $tok) {
         $v = trim($tok);
         // White-space only, skip!
-        if ($v === "") {
+        if ("" === $v) {
             // Do nothing!
         // Maybe a calculation
-        } else if (strpos($v, 'calc(') === 0) {
+        } else if (0 === strpos($v, 'calc(')) {
             $out .= $css_unit(preg_replace(['/\s+/', '/\s*([\(\)])\s*/'], [' ', '$1'], $tok));
         // Maybe a variable
-        } else if (strpos($v, 'var(') === 0) {
+        } else if (0 === strpos($v, 'var(')) {
             $out .= $css_unit(preg_replace('/\s*,\s*/', ',', $tok));
         // Maybe a URL function
-        } else if (strpos($v, 'src(') === 0 || strpos($v, 'url(') === 0) {
+        } else if (0 === strpos($v, 'src(') || 0 === strpos($v, 'url(')) {
             $tok = preg_replace_callback('/\s*(' . $S . ')\s*/', function($m) use($URL, $quote) {
                 $v = substr(substr($m[1], 1), 0, -1);
                 $v = str_replace($URL, "", $v); // Minify URL
                 // Remove quote(s) where possible
-                return $quote === 2 && strtr($v, '"\'>) ', '-----') === $v ? $v : '"' . $v . '"';
+                return 2 === $quote && strtr($v, '"\'>) ', '-----') === $v ? $v : '"' . $v . '"';
             }, $tok);
             $out .= $tok;
         // Maybe a HEX color code
-        } else if (strpos($v, '#') === 0 && (strlen($v) === 4 || strlen($v) === 7) && ctype_xdigit(substr($v, 1))) {
+        } else if (0 === strpos($v, '#') && (4 === strlen($v) || 7 === strlen($v)) && ctype_xdigit(substr($v, 1))) {
             // Minify HEX color code
             $out .= preg_replace('/([a-f\d])\1([a-f\d])\2([a-f\d])\3/i', '$1$2$3', strtolower($tok));
         // Maybe a pseudo and class selector or a value with its `:` prefix
-        } else if (strpos(':.', $v[0]) !== false) {
+        } else if (false !== strpos(':.', $v[0])) {
             $out .= $tok;
         } else {
             $out .= $css_unit($tok);
@@ -201,10 +201,10 @@ $css_unit = function(string $in) use(&$NUMBER): string {
     // Minify unit(s)
     return preg_replace_callback('/(' . $NUMBER . ')(%|Hz|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|in|kHz|mm|ms|pc|pt|px|rad|rem|s|turn|vh|vmax|vmin|vw)\b/', function($m) {
         $v = $m[1];
-        $v = strpos($v, '-') === 0 ? '-' . ltrim(substr($v, 1), '0') : ltrim($v, '0');
-        $v = strpos($v, '.') === 0 ? trim($v, '0') : $v;
-        $v = $v === '-' || $v === "" ? '0' : $v;
-        return $v . ($v === '0' ? "" : $m[2]);
+        $v = 0 === strpos($v, '-') ? '-' . ltrim(substr($v, 1), '0') : ltrim($v, '0');
+        $v = 0 === strpos($v, '.') ? trim($v, '0') : $v;
+        $v = '-' === $v || "" === $v ? '0' : $v;
+        return $v . ('0' === $v ? "" : $m[2]);
     }, $out);
 };
 
@@ -216,7 +216,7 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
     &$js,
     &$json
 ): string {
-    if (($in = trim($in)) === "") {
+    if ("" === ($in = trim($in))) {
         return "";
     }
     // Match HTML comment
@@ -239,39 +239,52 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
         $ENT .
     ')/i', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
         $v = trim($tok);
-        if ($tok === ' ') {
+        if (' ' === $tok) {
             // Fix case for `<button>Foo</button> <button>Bar</button>`
             // and `Foo bar baz <img src="smiley.gif"> qux`
             $out .= $tok; // Keep single white-space
             continue;
-        } else if ($v === "") {
+        } else if ("" === $v) {
             continue; // Skip multiple white-space(s) and single line-break
         // May be a HTML tag
-        } else if ($v[0] === '<' && substr($v, -1) === '>') {
+        } else if ('<' === $v[0] && '>' === substr($v, -1)) {
             // This must be a HTML comment
-            if (strpos($v, '<!--') === 0 && substr($v, -3) === '-->') {
-                if ($comment === 1 || ($comment === 2 && substr($v, -12) === '<![endif]-->')) {
+            if (0 === strpos($v, '<!--') && '-->' === substr($v, -3)) {
+                if (1 === $comment || (2 === $comment && '<![endif]-->' === substr($v, -12))) {
                     $out .= $v; // Keep legacy IE conditional comment(s)
                     continue;
                 }
                 continue; // Is a HTML comment, skip!
             }
-            if (substr($v, -6) === '</pre>') {
+            if ('</pre>' === substr($v, -6)) {
                 $tok = $html_content($tok, 'pre');
             // Minify embedded JS code
-            } else if (substr($v, -9) === '</script>') {
-                $fn = strpos($v, ' type=') !== false && preg_match('/ type=([\'"])(application\/json)\1[ >]/', $v) ? $json : $js;
+            } else if ('</script>' === substr($v, -9)) {
+                $fn = false !== strpos($v, ' type=') && preg_match('/ type=([\'"])(application\/json)\1[ >]/', $v) ? $json : $js;
                 $tok = $html_content($tok, 'script', $fn);
             // Minify embedded CSS code
-            } else if (substr($v, -8) === '</style>') {
+            } else if ('</style>' === substr($v, -8)) {
                 $tok = $html_content($tok, 'style', $css);
             }
-            $out .= $html_data($tok, $quote); // Is a HTML tag
-        } else if ($v[0] === '&' && substr($v, -1) === ';' && $v !== '&lt;' && $v !== '&gt;' && $v !== '&amp;') {
+            $tok = $html_data($tok, $quote); // Is a HTML tag
+            if (0 === strpos($tok, '</')) {
+                $tok = P . $tok; // Is HTML close tag
+            } else if (false === strpos($tok, '</')) {
+                if (false === strpos(',img,input,', ',' . explode(' ', trim($tok, '<>'))[0] . ',')) {
+                    $tok .= P; // Is HTML open tag
+                }
+            }
+            $out .= $tok;
+        } else if ('&' === $v[0] && ';' === substr($v, -1) && '&lt;' !== $v && '&gt;' !== $v && '&amp;' !== $v) {
             $out .= html_entity_decode($v); // Evaluate HTML entity
         } else {
             $out .= $tok; // Other(s)
         }
+    }
+    // Clean up!
+    if (false !== strpos($out, P)) {
+        // `<tag>[remove white-space here]foo bar baz[remove white-space here]</tag>`
+        $out = preg_replace(['/\s*' . P . '</', '/>' . P . '\s*/'], ['<', '>'], $out);
     }
     return $out;
 };
@@ -289,9 +302,9 @@ $html_data = function(string $in, int $quote) use(
     &$css
 ): string {
     return (
-        strpos($in, ' ') === false &&
-        strpos($in, "\n") === false &&
-        strpos($in, "\t") === false
+        false === strpos($in, ' ') &&
+        false === strpos($in, "\n") &&
+        false === strpos($in, "\t")
     ) ? $in : preg_replace_callback('/<([^>\/\s]+)\s*(\s[^>]+?)?\s*>/', function($m) use(
         $STRING,
         $URL,
@@ -301,14 +314,14 @@ $html_data = function(string $in, int $quote) use(
         $KEY = '[a-z_-][a-z\d_-]*';
         if (isset($m[2])) {
             // Minify CSS inline code
-            if (strpos($m[2], ' style=') !== false) {
+            if (false !== strpos($m[2], ' style=')) {
                 $m[2] = preg_replace_callback('/( style=)(' . $STRING() . ')/', function($m) use($css) {
                     $q = $m[2][0];
                     return $m[1] . $q . $css(substr($m[2], 1, -1)) . $q;
                 }, $m[2]);
             }
             // Minify URL in attribute value
-            if (strpos($m[2], '=') !== false && strpos($m[2], '://') !== false) {
+            if (false !== strpos($m[2], '=') && false !== strpos($m[2], '://')) {
                 $m[2] = str_replace([
                     '="' . $URL . '"',
                     "='" . $URL . "'",
@@ -336,7 +349,7 @@ $html_data = function(string $in, int $quote) use(
                 // [^3]
                 '/'
             ], strtr($m[2], "\n", ' ')) . '>';
-            return $quote === 2 ? preg_replace('/=([\'"])(' . $KEY . ')\1/i', '=$2', $out) : $out;
+            return 2 === $quote ? preg_replace('/=([\'"])(' . $KEY . ')\1/i', '=$2', $out) : $out;
         }
         return '<' . $m[1] . '>';
     }, $in);
@@ -347,7 +360,7 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
     &$NUMBER,
     &$TOKEN
 ): string {
-    if (($in = trim($in)) === "") {
+    if ("" === ($in = trim($in))) {
         return "";
     }
     // Match JS comment inline
@@ -371,21 +384,21 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
         $LITERAL . '|' .
         $TOKEN .
     ')\s*/', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
-        if (strpos($tok, '//') === 0) {
+        if (0 === strpos($tok, '//')) {
             continue; // Is a comment, skip!
         }
-        if (strpos($tok, '/*') === 0 && substr($tok, -2) === '*/') {
+        if (0 === strpos($tok, '/*') && '*/' === substr($tok, -2)) {
             if (
-                $comment === 1 || (
-                    $comment === 2 && (
+                1 === $comment || (
+                    2 === $comment && (
                         // Detect special comment(s) from the third character
                         // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                        strpos('!*', $tok[2]) !== false ||
+                        false !== strpos('!*', $tok[2]) ||
                         // Detect license comment(s) from the content
                         // It should contains character(s) like `@license`
-                        strpos($tok, '@licence') !== false || // noun
-                        strpos($tok, '@license') !== false || // verb
-                        strpos($tok, '@preserve') !== false
+                        false !== strpos($tok, '@licence') || // noun
+                        false !== strpos($tok, '@license') || // verb
+                        false !== strpos($tok, '@preserve')
                     )
                 )
             ) {
@@ -395,29 +408,29 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
             continue; // Is a comment, skip!
         // String block, don’t touch!
         } else if (
-            strpos($tok, '"') === 0 && substr($tok, -1) === '"' ||
-            strpos($tok, "'") === 0 && substr($tok, -1) === "'" ||
-            strpos($tok, "`") === 0 && substr($tok, -1) === "`"
+            0 === strpos($tok, '"') && '"' === substr($tok, -1) ||
+            0 === strpos($tok, "'") && "'" === substr($tok, -1) ||
+            0 === strpos($tok, '`') && '`' === substr($tok, -1)
         ) {
             $out .= $tok;
         // Maybe a pattern
-        } else if ($tok[0] === '/' && preg_match('/^\/.+\/[a-z]*[;,.\s]$/', $tok)) {
+        } else if ('/' === $tok[0] && preg_match('/^\/.+\/[a-z]*[;,.\s]$/', $tok)) {
             $out .= trim($tok);
         } else if (is_numeric($tok)) {
-            $tok = strpos($tok, '-') === 0 ? '-' . ltrim(substr($tok, 1), '0') : ltrim($tok, '0');
-            $tok = strpos($tok, '.') === 0 ? trim($tok, '0') : $tok;
-            $out .= $tok === "" ? '0' : $tok; // Minify number(s)
+            $tok = 0 === strpos($tok, '-') ? '-' . ltrim(substr($tok, 1), '0') : ltrim($tok, '0');
+            $tok = 0 === strpos($tok, '.') ? trim($tok, '0') : $tok;
+            $out .= "" === $tok ? '0' : $tok; // Minify number(s)
         } else {
-            if ($tok === ']') {
+            if (']' === $tok) {
                 $out = rtrim($out, ',') . $tok; // Remove the last comma
-            } else if ($tok === '}') {
+            } else if ('}' === $tok) {
                 $out = rtrim($out, ';,') . $tok; // Remove the last semi-colon and comma
             } else {
                 $out .= $K[$tok] ?? $tok;
             }
         }
     }
-    return $quote !== 1 ? preg_replace([
+    return 1 !== $quote ? preg_replace([
         // Minify object property [^1]
         '/([{,])([\'"])(' . $KEY . ')\2:/',
         // Minify object access [^2]
@@ -485,7 +498,7 @@ $php = function(string $in): string {
                 $state = false;
             } else {
                 if ($id === T_OPEN_TAG) {
-                    if (strpos($value, ' ') !== false || strpos($value, "\n") !== false || strpos($value, "\t") !== false || strpos($value, "\r") !== false) {
+                    if (false !== strpos($value, ' ') || false !== strpos($value, "\n") || false !== strpos($value, "\t") || false !== strpos($value, "\r")) {
                         $value = rtrim($value);
                     }
                     $out .= $value . ' ';
@@ -508,14 +521,14 @@ $php = function(string $in): string {
                     $out .= $value;
                     $state = true;
                 } else if ($id === T_ENCAPSED_AND_WHITESPACE || $id === T_CONSTANT_ENCAPSED_STRING) {
-                    if ($value[0] === '"') {
+                    if ('"' === $value[0]) {
                         $value = addcslashes($value, "\n\r\t");
                     }
                     $out .= $value;
                     $state = true;
                 } else if ($id === T_WHITESPACE) {
                     $n = $toks[$i + 1] ?? null;
-                    if(!$state && (!is_string($n) || $n === '$') && !isset($t[$n[0]])) {
+                    if(!$state && (!is_string($n) || '$' === $n) && !isset($t[$n[0]])) {
                         $out .= ' ';
                     }
                     $state = false;
@@ -523,12 +536,12 @@ $php = function(string $in): string {
                     $out .= "<<<S\n";
                     $state = false;
                     $doc = true; // Enter HEREDOC
-                } elseif($id === T_END_HEREDOC) {
+                } else if ($id === T_END_HEREDOC) {
                     $out .= 'S;';
                     $state = true;
                     $doc = false; // Exit HEREDOC
                     for ($j = $i + 1; $j < $c; ++$j) {
-                        if (is_string($toks[$j]) && $toks[$j] === ';') {
+                        if (is_string($toks[$j]) && ';' === $toks[$j]) {
                             $i = $j;
                             break;
                         } else if ($toks[$j][0] === T_CLOSE_TAG) {
@@ -544,7 +557,7 @@ $php = function(string $in): string {
             }
             $end = "";
         } else {
-            if (strpos(';:', $tok) === false || $end !== $tok) {
+            if (false === strpos(';:', $tok) || $end !== $tok) {
                 $out .= $tok;
                 $end = $tok;
             }
