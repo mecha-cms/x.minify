@@ -448,7 +448,7 @@ $json = function(string $in): string {
 };
 
 // Based on <https://php.net/manual/en/function.php-strip-whitespace.php#82437>
-$php = function(string $in): string {
+$php = function(string $in, int $comment = 2, int $quote = 1): string {
     $out = "";
     // White-space(s) around these token(s) can be ignored
     static $t = [
@@ -461,6 +461,7 @@ $php = function(string $in): string {
         T_DIV_EQUAL => 1,                // /=
         T_DOLLAR_OPEN_CURLY_BRACES => 1, // ${
         T_DOUBLE_ARROW => 1,             // =>
+        T_DOUBLE_CAST => 1,              // (int), (string), etc
         T_DOUBLE_COLON => 1,             // ::
         T_INC => 1,                      // ++
         T_IS_EQUAL => 1,                 // ==
@@ -486,73 +487,94 @@ $php = function(string $in): string {
         T_XOR_EQUAL => 1                 // ^=
     ];
     $c = count($toks = token_get_all($in));
-    $doc = $state = false;
+    $doc = $skip = false;
     $begin = $end = null;
     for ($i = 0; $i < $c; ++$i) {
         $tok = $toks[$i];
         if (is_array($tok)) {
             $id = $tok[0];
             $value = $tok[1];
-            if ($id === T_INLINE_HTML) {
+            if (T_INLINE_HTML === $id) {
                 $out .= $value;
-                $state = false;
+                $skip = false;
             } else {
-                if ($id === T_OPEN_TAG) {
-                    if (false !== strpos($value, ' ') || false !== strpos($value, "\n") || false !== strpos($value, "\t") || false !== strpos($value, "\r")) {
+                if (T_OPEN_TAG === $id) {
+                    if (
+                        false !== strpos($value, ' ') ||
+                        false !== strpos($value, "\n") ||
+                        false !== strpos($value, "\t") ||
+                        false !== strpos($value, "\r")
+                    ) {
                         $value = rtrim($value);
                     }
                     $out .= $value . ' ';
                     $begin = T_OPEN_TAG;
-                    $state = true;
-                } else if ($id === T_OPEN_TAG_WITH_ECHO) {
+                    $skip = true;
+                } else if (T_OPEN_TAG_WITH_ECHO === $id) {
                     $out .= $value;
                     $begin = T_OPEN_TAG_WITH_ECHO;
-                    $state = true;
-                } else if ($id === T_CLOSE_TAG) {
-                    if ($begin == T_OPEN_TAG_WITH_ECHO) {
+                    $skip = true;
+                } else if (T_CLOSE_TAG === $id) {
+                    if (T_OPEN_TAG_WITH_ECHO === $begin) {
                         $out = rtrim($out, '; ');
                     } else {
                         $value = ' ' . $value;
                     }
                     $out .= $value;
                     $begin = null;
-                    $state = false;
+                    $skip = false;
                 } else if (isset($t[$id])) {
                     $out .= $value;
-                    $state = true;
-                } else if ($id === T_ENCAPSED_AND_WHITESPACE || $id === T_CONSTANT_ENCAPSED_STRING) {
+                    $skip = true;
+                } else if (T_ENCAPSED_AND_WHITESPACE === $id || T_CONSTANT_ENCAPSED_STRING === $id) {
                     if ('"' === $value[0]) {
                         $value = addcslashes($value, "\n\r\t");
                     }
                     $out .= $value;
-                    $state = true;
-                } else if ($id === T_WHITESPACE) {
+                    $skip = true;
+                } else if (T_WHITESPACE === $id) {
                     $n = $toks[$i + 1] ?? null;
-                    if(!$state && (!is_string($n) || '$' === $n) && !isset($t[$n[0]])) {
+                    if(!$skip && (!is_string($n) || '$' === $n) && !isset($t[$n[0]])) {
                         $out .= ' ';
                     }
-                    $state = false;
-                } else if ($id === T_START_HEREDOC) {
+                    $skip = false;
+                } else if (T_START_HEREDOC === $id) {
                     $out .= "<<<S\n";
-                    $state = false;
+                    $skip = false;
                     $doc = true; // Enter HEREDOC
-                } else if ($id === T_END_HEREDOC) {
+                } else if (T_END_HEREDOC === $id) {
                     $out .= 'S;';
-                    $state = true;
+                    $skip = true;
                     $doc = false; // Exit HEREDOC
                     for ($j = $i + 1; $j < $c; ++$j) {
                         if (is_string($toks[$j]) && ';' === $toks[$j]) {
                             $i = $j;
                             break;
-                        } else if ($toks[$j][0] === T_CLOSE_TAG) {
+                        } else if (T_CLOSE_TAG === $toks[$j][0]) {
                             break;
                         }
                     }
-                } else if ($id === T_COMMENT || $id === T_DOC_COMMENT) {
-                    $state = true;
+                } else if (T_COMMENT === $id || T_DOC_COMMENT === $id) {
+                    if (
+                        1 === $comment || (
+                            2 === $comment && (
+                                // Detect special comment(s) from the third character
+                                // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
+                                false !== strpos('!*', $value[2]) ||
+                                // Detect license comment(s) from the content
+                                // It should contains character(s) like `@license`
+                                false !== strpos($value, '@licence') || // noun
+                                false !== strpos($value, '@license') || // verb
+                                false !== strpos($value, '@preserve')
+                            )
+                        )
+                    ) {
+                        $out .= $value;
+                    }
+                    $skip = true;
                 } else {
                     $out .= $value;
-                    $state = false;
+                    $skip = false;
                 }
             }
             $end = "";
@@ -561,7 +583,7 @@ $php = function(string $in): string {
                 $out .= $tok;
                 $end = $tok;
             }
-            $state = true;
+            $skip = true;
         }
     }
     return $out;

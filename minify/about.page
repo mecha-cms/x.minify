@@ -100,7 +100,7 @@ html {
 #### JS
 
 ~~~ .xmp.php
-Minify::JS(string $in, int $comment = 2): string;
+Minify::JS(string $in, int $comment = 2, int $quote = 2): string;
 ~~~
 
 Minify JavaScript string:
@@ -122,7 +122,7 @@ Minify::JSON(string $in): string;
 #### PHP
 
 ~~~ .xmp.php
-Minify::PHP(string $in): string;
+Minify::PHP(string $in, int $comment = 2): string;
 ~~~
 
 ---
