@@ -453,6 +453,8 @@ $php = function(string $in, int $comment = 2, int $quote = 1): string {
     // White-space(s) around these token(s) can be ignored
     static $t = [
         T_AND_EQUAL => 1,                // &=
+        T_ARRAY_CAST => 1,               // (array)
+        T_BOOL_CAST => 1,                // (bool) and (boolean)
         T_BOOLEAN_AND => 1,              // &&
         T_BOOLEAN_OR => 1,               // ||
         T_COALESCE => 1,                 // ??
@@ -461,9 +463,10 @@ $php = function(string $in, int $comment = 2, int $quote = 1): string {
         T_DIV_EQUAL => 1,                // /=
         T_DOLLAR_OPEN_CURLY_BRACES => 1, // ${
         T_DOUBLE_ARROW => 1,             // =>
-        T_DOUBLE_CAST => 1,              // (int), (string), etc
+        T_DOUBLE_CAST => 1,              // (double) or (float) or (real)
         T_DOUBLE_COLON => 1,             // ::
         T_INC => 1,                      // ++
+        T_INT_CAST => 1,                 // (int) or (integer)
         T_IS_EQUAL => 1,                 // ==
         T_IS_GREATER_OR_EQUAL => 1,      // >=
         T_IS_IDENTICAL => 1,             // ===
@@ -484,6 +487,7 @@ $php = function(string $in, int $comment = 2, int $quote = 1): string {
         T_SPACESHIP => 1,                // <=>
         T_SR => 1,                       // >>
         T_SR_EQUAL => 1,                 // >>=
+        T_STRING_CAST => 1,              // (string)
         T_XOR_EQUAL => 1                 // ^=
     ];
     $c = count($toks = token_get_all($in));
