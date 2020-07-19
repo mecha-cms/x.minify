@@ -1,5 +1,8 @@
 <?php
 
+$do_minify_embed_css = true;
+$do_minify_embed_js = true;
+
 $NUMBER = '(?:-?(?:(?:\d+)?\.)?\d+)';
 $STRING = function(string $limit = '\'"', string $not = ""): string {
     $out = [];
@@ -211,6 +214,8 @@ $css_unit = function(string $in) use(&$NUMBER): string {
 $html = function(string $in, int $comment = 2, int $quote = 1) use(
     &$XML,
     &$css,
+    &$do_minify_embed_css,
+    &$do_minify_embed_js,
     &$html_content,
     &$html_data,
     &$js,
@@ -259,11 +264,11 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
             if ('</pre>' === substr($v, -6)) {
                 $tok = $html_content($tok, 'pre');
             // Minify embedded JS code
-            } else if ('</script>' === substr($v, -9)) {
+            } else if ($do_minify_embed_js && '</script>' === substr($v, -9)) {
                 $fn = false !== strpos($v, ' type=') && preg_match('/ type=([\'"])(application\/json)\1[ >]/', $v) ? $json : $js;
                 $tok = $html_content($tok, 'script', $fn);
             // Minify embedded CSS code
-            } else if ('</style>' === substr($v, -8)) {
+            } else if ($do_minify_embed_css && '</style>' === substr($v, -8)) {
                 $tok = $html_content($tok, 'style', $css);
             }
             $tok = $html_data($tok, $quote); // Is a HTML tag
@@ -426,6 +431,15 @@ $js = function(string $in, int $comment = 2, int $quote = 2) use(
             } else if ('}' === $tok) {
                 $out = rtrim($out, ';,') . $tok; // Remove the last semi-colon and comma
             } else {
+                // Hot fix(es)
+                if (
+                    'case' === $tok ||
+                    'return' === $tok ||
+                    'return void' === $tok ||
+                    'void' === $tok
+                ) {
+                    $tok .= ' ';
+                }
                 $out .= $K[$tok] ?? $tok;
             }
         }

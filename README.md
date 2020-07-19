@@ -4,6 +4,10 @@ Minify Extension for Mecha
 Release Notes
 -------------
 
+### 2.5.3
+
+ - Hot fixes for JavaScript minifier.
+
 ### 2.5.2
 
  - Updated PHP minifier.
