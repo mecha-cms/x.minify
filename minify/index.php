@@ -1,4 +1,4 @@
-<?php namespace _\lot\x;
+<?php namespace x;
 
 function minify($content) {
     return \Minify::HTML($content);
