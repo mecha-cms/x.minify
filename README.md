@@ -1,5 +1,5 @@
-Minify Extension for Mecha
-==========================
+Minify Extension for [Mecha](https://github.com/mecha-cms/mecha)
+================================================================
 
 Release Notes
 -------------
