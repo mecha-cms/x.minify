@@ -4,7 +4,7 @@ $do_minify_embed_css = true;
 $do_minify_embed_js = true;
 
 $NUMBER = '(?:-?(?:(?:\d+)?\.)?\d+)';
-$STRING = function(string $limit = '\'"', string $not = ""): string {
+$STRING = static function(string $limit = '\'"', string $not = ""): string {
     $out = [];
     foreach (str_split($limit) as $v) {
         $out[] = $v . '(?:[^' . $v . $not . '\\\]|\\\.)*' . $v;
@@ -16,9 +16,11 @@ $STRING = function(string $limit = '\'"', string $not = ""): string {
 $TOKEN = '(?:[!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])';
 // Define root URL to be removed
 $URL = $url->ground;
+// Define current URL without the query string and hash
+$URL_CURRENT = preg_split('/[?&#]/', $url->current, 2)[0];
 
 // Generate XML tag pattern
-$XML = function(string $tag, string $end = '>', $wrap = true): string {
+$XML = static function(string $tag, string $end = '>', $wrap = true): string {
     // <https://www.w3.org/TR/html5/syntax.html#elements-attributes>
     $tag = '(?:' . $tag . ')';
     return '(?:<' . $tag . '(?:\s[^>]*)?' . $end . ($wrap ? '[\s\S]*?<\/' . $tag . '>' : "") . ')';
@@ -53,7 +55,11 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
         $ANY . '|' .
         $ATTR . '|' .
         // Exclude `%`, `-` and '.' from token list
-        str_replace(['%', '\-', '.'], "", $TOKEN) .
+        strtr($TOKEN, [
+            '%' => "",
+            '\-' => "",
+            '.' => ""
+        ]) .
     ')/i', n($in), null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $tok) {
         if (0 === strpos($tok, '/*') && '*/' === substr($tok, -2)) {
             if (
@@ -125,10 +131,11 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
     return $out;
 };
 
-$css_minify = function(string $in) use(
+$css_minify = static function(string $in) use(
     &$NUMBER,
     &$STRING,
     &$URL,
+    &$URL_CURRENT,
     &$css_unit
 ): string {
     // Match character(s) starts from `calc(` to `)`
@@ -170,7 +177,12 @@ $css_minify = function(string $in) use(
         } else if (0 === strpos($v, 'src(') || 0 === strpos($v, 'url(')) {
             $tok = preg_replace_callback('/\s*(' . $S . ')\s*/', function($m) use($URL, $quote) {
                 $v = substr(substr($m[1], 1), 0, -1);
-                $v = str_replace($URL, "", $v); // Minify URL
+                $v = strtr($v, [
+                    $URL_CURRENT . '/' => "",
+                    $URL_CURRENT . '?' => '?',
+                    $URL_CURRENT . '#' => '#',
+                    $URL => ""
+                ]); // Minify URL
                 // Remove quote(s) where possible
                 return 2 === $quote && strtr($v, '"\'>) ', '-----') === $v ? $v : '"' . $v . '"';
             }, $tok);
@@ -199,7 +211,7 @@ $css_minify = function(string $in) use(
     ], $out);
 };
 
-$css_unit = function(string $in) use(&$NUMBER): string {
+$css_unit = static function(string $in) use(&$NUMBER): string {
     $out = preg_replace('/\s+/', ' ', $in);
     // Minify unit(s)
     return preg_replace_callback('/(' . $NUMBER . ')(%|Hz|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|in|kHz|mm|ms|pc|pt|px|rad|rem|s|turn|vh|vmax|vmin|vw)\b/', function($m) {
@@ -294,16 +306,17 @@ $html = function(string $in, int $comment = 2, int $quote = 1) use(
     return $out;
 };
 
-$html_content = function(string $in, string $t, $fn = false): string {
+$html_content = static function(string $in, string $t, $fn = false): string {
     return preg_replace_callback('/<' . $t . '(\s[^>]*)?>\s*([\s\S]*?)\s*<\/' . $t . '>/', function($m) use($fn, $t) {
         return '<' . $t . $m[1] . '>' . ($fn ? $fn($m[2]) : $m[2]) . '</' . $t . '>';
     }, $in);
 };
 
-$html_data = function(string $in, int $quote) use(
+$html_data = static function(string $in, int $quote) use(
     &$KEY,
     &$STRING,
     &$URL,
+    &$URL_CURRENT,
     &$css
 ): string {
     return (
@@ -313,6 +326,7 @@ $html_data = function(string $in, int $quote) use(
     ) ? $in : preg_replace_callback('/<([^>\/\s]+)\s*(\s[^>]+?)?\s*>/', function($m) use(
         $STRING,
         $URL,
+        $URL_CURRENT,
         $css,
         $quote
     ) {
@@ -327,17 +341,18 @@ $html_data = function(string $in, int $quote) use(
             }
             // Minify URL in attribute value
             if (false !== strpos($m[2], '=') && false !== strpos($m[2], '://')) {
-                $m[2] = str_replace([
-                    '="' . $URL . '"',
-                    "='" . $URL . "'",
-                    '="' . $URL,
-                    "='" . $URL
-                ], [
-                    '="/"',
-                    "='/'",
-                    '="',
-                    "='"
-                ], $m[2]);
+                $m[2] = strtr($m[2], [
+                    '="' . $URL_CURRENT . '/' => '="',
+                    '="' . $URL_CURRENT . '?' => '="?',
+                    '="' . $URL_CURRENT . '#' => '="#',
+                    "='" . $URL_CURRENT . '/' => "='",
+                    "='" . $URL_CURRENT . '?' => "='?",
+                    "='" . $URL_CURRENT . '#' => "='#",
+                    '="' . $URL . '"' => '="/"',
+                    "='" . $URL . "'" => "='/'",
+                    '="' . $URL => '="',
+                    "='" . $URL => "='"
+                ]);
             }
             $out = '<' . $m[1] . preg_replace([
                 // From `a="a"`, `a='a'`, `a="true"`, `a='true'`, `a=""` and `a=''` to `a` [^1]
