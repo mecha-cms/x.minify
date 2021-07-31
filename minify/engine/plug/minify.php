@@ -17,7 +17,7 @@ $TOKEN = '(?:[!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])';
 // Define root URL to be removed
 $URL = $url->ground;
 // Define current URL without the query string and hash
-$URL_CURRENT = preg_split('/[?&#]/', $url->current, 2)[0];
+$URL_CURRENT = strtok($url->current, '?&#');
 
 // Generate XML tag pattern
 $XML = static function(string $tag, string $end = '>', $wrap = true): string {
