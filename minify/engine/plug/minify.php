@@ -16,8 +16,6 @@ $STRING = static function(string $limit = '\'"', string $not = ""): string {
 $TOKEN = '(?:[!%&*\(\)\-=+\[\]\{\}|;:,.<>?\/])';
 // Define root URL to be removed
 $URL = $url->ground;
-// Define current URL without the query string and hash
-$URL_CURRENT = strtok($url->current, '?&#');
 
 // Generate XML tag pattern
 $XML = static function(string $tag, string $end = '>', $wrap = true): string {
@@ -135,7 +133,6 @@ $css_minify = static function(string $in) use(
     &$NUMBER,
     &$STRING,
     &$URL,
-    &$URL_CURRENT,
     &$css_unit
 ): string {
     // Match character(s) starts from `calc(` to `)`
@@ -178,9 +175,6 @@ $css_minify = static function(string $in) use(
             $tok = preg_replace_callback('/\s*(' . $S . ')\s*/', function($m) use($URL, $quote) {
                 $v = substr(substr($m[1], 1), 0, -1);
                 $v = strtr($v, [
-                    $URL_CURRENT . '/' => "",
-                    $URL_CURRENT . '?' => '?',
-                    $URL_CURRENT . '#' => '#',
                     $URL => ""
                 ]); // Minify URL
                 // Remove quote(s) where possible
@@ -316,7 +310,6 @@ $html_data = static function(string $in, int $quote) use(
     &$KEY,
     &$STRING,
     &$URL,
-    &$URL_CURRENT,
     &$css
 ): string {
     return (
@@ -326,7 +319,6 @@ $html_data = static function(string $in, int $quote) use(
     ) ? $in : preg_replace_callback('/<([^>\/\s]+)\s*(\s[^>]+?)?\s*>/', function($m) use(
         $STRING,
         $URL,
-        $URL_CURRENT,
         $css,
         $quote
     ) {
@@ -342,12 +334,6 @@ $html_data = static function(string $in, int $quote) use(
             // Minify URL in attribute value
             if (false !== strpos($m[2], '=') && false !== strpos($m[2], '://')) {
                 $m[2] = strtr($m[2], [
-                    '="' . $URL_CURRENT . '/' => '="',
-                    '="' . $URL_CURRENT . '?' => '="?',
-                    '="' . $URL_CURRENT . '#' => '="#',
-                    "='" . $URL_CURRENT . '/' => "='",
-                    "='" . $URL_CURRENT . '?' => "='?",
-                    "='" . $URL_CURRENT . '#' => "='#",
                     '="' . $URL . '"' => '="/"',
                     "='" . $URL . "'" => "='/'",
                     '="' . $URL => '="',
