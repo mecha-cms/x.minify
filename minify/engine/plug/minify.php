@@ -579,7 +579,7 @@ $php = function(string $in, int $comment = 2, int $quote = 1): string {
                             2 === $comment && (
                                 // Detect special comment(s) from the third character
                                 // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                                false !== strpos('!*', $value[2]) ||
+                                !empty($value[2]) && false !== strpos('!*', $value[2]) ||
                                 // Detect license comment(s) from the content
                                 // It should contains character(s) like `@license`
                                 false !== strpos($value, '@licence') || // noun
