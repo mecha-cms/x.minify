@@ -562,7 +562,7 @@ $php = function(string $in, int $comment = 2, int $quote = 1): string {
                     $skip = false;
                     $doc = true; // Enter HEREDOC
                 } else if (T_END_HEREDOC === $id) {
-                    $out .= 'S;';
+                    $out .= "S;\n";
                     $skip = true;
                     $doc = false; // Exit HEREDOC
                     for ($j = $i + 1; $j < $c; ++$j) {
