@@ -120,7 +120,7 @@ $css = function(string $in, int $comment = 2, int $quote = 2) use(
                 $out = explode('}', $out);
                 array_pop($out);
                 array_pop($out);
-                // `}` concatenated to the end of the implode() function
+                // `}` concatenated to the end of the `implode()` function
                 // to fix the problem with the closing brace not appearing
                 // at the end of the CSS selector
                 $out = implode('}', $out) . '}';
