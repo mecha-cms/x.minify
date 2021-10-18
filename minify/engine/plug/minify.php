@@ -200,11 +200,18 @@ $css_minify = static function(string $in) use(
         '/:0(?: 0){1,3}([};,])/',
         '/\bbackground:(?:none|0)\b/',
         '/\b(border(?:-radius)?|outline):none\b/'
+        '/screen and/', // Temp fix: adds space after `screen and`
+        // Added from the `fn_minify_css_union()` function of the earlier version
+        // Replace `0.6` with `.6` [^6]
+        '#\b0+\.(\d+)#'
     ], [
         ' ',
         ':0$1',
         'background:0 0',
-        '$1:0'
+        '$1:0',
+        '$0 ',
+        // [^6]
+        '.$1'
     ], $out);
 };
 
