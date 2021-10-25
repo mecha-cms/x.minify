@@ -1,0 +1,95 @@
+#foo {}
+
+* {}
+
+.bar {}
+
+:focus {}
+
+a {
+  text-decoration: none;
+  color : inherit;
+}
+
+[foo="bar"] {}
+
+p + p {
+    margin-top: 1rem;
+    }
+
+nav li:hover > ul {
+    opacity: 1;
+    top: 0px;
+    visibility: visible;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: inherit;
+}
+
+b, dt, legend, strong {
+  font-weight: bold;
+}
+
+test-empty {}
+
+test-empty { }
+
+test-empty {
+
+}
+
+test-empty { /* empty */ }
+test-not-empty { /*! not empty */ }
+
+@media (max-width: 1024px) {
+    /* empty */
+}
+
+test-comment {
+    /*! rgba( 255 , 255 , 255 , 0.5 ) */
+}
+
+test-function {
+    color: rgb(255, 255, 255);
+    color: rgb( 255 , 255,    255 );
+    color: rgba(255, 255 ,  255, 0.5);
+    color: rgba( 255  255    255 / 0.5 );
+}
+
+test-number {
+    margin: .01px;
+    margin: .1px;
+    margin: 0%;
+    margin: 0.01px;
+    margin: 0.1px;
+    margin: 0;
+    margin: 0deg;
+    margin: 0px;
+    margin: 1%;
+    margin: 1deg;
+    margin: 1px;
+}
+
+test-shorthand {
+    margin: 0 0 0px;
+    margin: 0 0px 0 0;
+    margin: 0 0px;
+    margin: 1px 0 1px;
+    margin: 1px 0px 1px 0;
+}
+
+test-string {
+    content: url('rgba( 255 , 255 , 255 , 0.5 )');
+}
+
+misc {
+    background: none;
+    border: none;
+    outline: none;
+}
