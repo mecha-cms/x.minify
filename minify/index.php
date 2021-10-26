@@ -6,4 +6,6 @@ function minify($content) {
 
 \Hook::set('content', __NAMESPACE__ . "\\minify", 2);
 
-require __DIR__ . DS . 'engine' . DS . 'plug' . DS . '_todo.php';
+if (\defined("\\DEBUG") && 'x.minify' === \DEBUG) {
+    require __DIR__ . \DS . 'test.php';
+}

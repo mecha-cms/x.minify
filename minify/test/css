@@ -1,3 +1,5 @@
+@charset 'UTF-8';
+
 #foo {}
 
 * {}
@@ -16,11 +18,56 @@ a {
 p + p {
     margin-top: 1rem;
     }
+    p ~ p {
+        background: yellow;
+    }
+
+nav ul li {
+    list-style: none;
+}
 
 nav li:hover > ul {
     opacity: 1;
     top: 0px;
     visibility: visible;
+}
+
+a * a {
+    color: #000;
+}
+
+a :hover a {
+    color: #000;
+}
+
+a[href*="a[sdf]" i] { color: black; }
+a[href*="a[sdf]"] { color: black; }
+a[href*="asdf" i] { color: black; }
+a[href*='a[sdf]' i] { color: black; }
+a[href*='a[sdf]'] { color: black; }
+a[href*='asdf' i] { color: black; }
+a[href*=asdf i] { color: black; }
+a[href*=asdf] { color: black; }
+a[href] { color: black; }
+
+[foo] :bar , [foo] .bar , [foo] #bar {
+    color: yellow;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+:is( h1, h2, h3, h4, h5, h6:not( :nth-child( n+2 ) ) ) {
+    display: none;
+}
+
+a :nth-child( n+1 ) [tabindex] {
+    color: brown;
+}
+
+[foo] [bar] * :baz {
+    color: white;
 }
 
 h1,
@@ -51,6 +98,14 @@ test-not-empty { /*! not empty */ }
     /* empty */
 }
 
+@media (max-width: 1024px) and (prefers-color-scheme: dark) {
+    body {
+        font-size: 16px;
+    }
+}
+
+@import url('http://example.com/file.css');
+
 test-comment {
     /*! rgba( 255 , 255 , 255 , 0.5 ) */
 }
@@ -62,7 +117,25 @@ test-function {
     color: rgba( 255  255    255 / 0.5 );
 }
 
-test-number {
+test-shorthand {
+    margin: 0 0 0 0;
+    margin: 0 0 0;
+    margin: 0 0 0px;
+    margin: 0 0;
+    margin: 0 0px 0 0;
+    margin: 0 0px;
+    margin: 1px 0 1px;
+    margin: 1px 0px 1px 0;
+    margin: 1px 1px 1px 1px;
+    margin: 1px 1px 1px;
+    margin: 1px 1px;
+}
+
+test-string {
+    content: url('rgba( 255 , 255 , 255 , 0.5 )');
+}
+
+test-unit {
     margin: .01px;
     margin: .1px;
     margin: 0%;
@@ -74,22 +147,31 @@ test-number {
     margin: 1%;
     margin: 1deg;
     margin: 1px;
-}
-
-test-shorthand {
-    margin: 0 0 0px;
-    margin: 0 0px 0 0;
-    margin: 0 0px;
-    margin: 1px 0 1px;
-    margin: 1px 0px 1px 0;
-}
-
-test-string {
-    content: url('rgba( 255 , 255 , 255 , 0.5 )');
+    margin: -.01px;
+    margin: -.1px;
+    margin: -0%;
+    margin: -0.01px;
+    margin: -0.1px;
+    margin: -0;
+    margin: -0deg;
+    margin: -0px;
+    margin: -1%;
+    margin: -1deg;
+    margin: -1px;
 }
 
 misc {
     background: none;
     border: none;
     outline: none;
+}
+
+misc-no-trailing-comma {
+    margin: 0px 0px;
+    font-weight: bold
+}
+
+misc-no-trailing-comma {
+    font-weight: bold;
+    margin: 0px 0px
 }
