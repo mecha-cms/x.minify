@@ -7,16 +7,24 @@ $test = <<<TEST
 TEST;
 
 /*! bug */
-$test = [1, <<<TEST
+$test = [1, 2, 3, <<<TEST
   <div></div>
 TEST
 ];
 
+$test = [<<<TEST
+  <div></div>
+TEST, 1, 2, 3];
+
 /*! bug */
-test(1, <<<TEST
+test(1, 2, 3, <<<TEST
   <div></div>
 TEST
 );
+
+test(<<<TEST
+  <div></div>
+TEST, 1, 2, 3);
 
 $foo = ' $foo = "bar"; ' ;
 $foo = '<?php echo $foo; ?>';

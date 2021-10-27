@@ -534,17 +534,30 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     $skip = true;
                     $doc = false; // Exit HEREDOC
                     for ($j = $i + 1; $j < $c; ++$j) {
-                        if (\is_string($toks[$j])) {
-                            $out .= $toks[$j];
-                            if (';' === $toks[$j]) {
-                                if ("\nS\n;" === \substr($out, -4)) {
-                                    $out = \rtrim($out, "\n;") . ";\n";
+                        if (\is_string($v = $toks[$j])) {
+                            $out .= $v;
+                            if (';' === $v || ',' === $v) {
+                                if ("\nS\n" . $v === \substr($out, -4)) {
+                                    $out = \rtrim($out, "\n" . $v) . $v;
+                                    if (';' === $v) {
+                                        // Prior to PHP 7.3.0, it is very important to note that the line with the closing identifier must
+                                        // contain no other characters, except a semicolon (`;`). That means especially that the identifier
+                                        // may not be indented, and there may not be any spaces or tabs before or after the semicolon.
+                                        // It's also important to realize that the first character before the closing identifier must be a
+                                        // newline as defined by the local operating system. This is `\n` on UNIX systems, including macOS.
+                                        // The closing delimiter must also be followed by a newline.
+                                        //
+                                        // <https://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc>
+                                        $out .= "\n";
+                                    }
                                 }
                                 $i = $j;
                                 break;
                             }
-                        } else if (\T_CLOSE_TAG === $toks[$j][0]) {
+                        } else if (\T_CLOSE_TAG === $v[0]) {
                             break;
+                        } else {
+                            $out .= \trim($v[1]);
                         }
                     }
                 } else if (\T_COMMENT === $id || \T_DOC_COMMENT === $id) {
