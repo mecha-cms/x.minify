@@ -1,19 +1,18 @@
 @charset 'UTF-8';
 
-#foo {}
+@import url('http://example.com/file.css');
 
-* {}
-
-.bar {}
-
-:focus {}
+@font-face {
+    font-family: 'font family';
+    src : url('./path/to/file.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
 
 a {
   text-decoration: none;
   color : inherit;
 }
-
-[foo="bar"] {}
 
 p + p {
     margin-top: 1rem;
@@ -94,6 +93,13 @@ test-empty {
 test-empty { /* empty */ }
 test-not-empty { /*! not empty */ }
 
+test-empty, foo, bar {}
+
+test-empty[test='{ margin: 0px; }'] {}
+test-empty[test="{ margin: 0px; }"] {}
+test-not-empty[test='{}'] { margin: 0px; }
+test-not-empty[test="{}"] { margin: 0px; }
+
 @media (max-width: 1024px) {
     /* empty */
 }
@@ -104,13 +110,32 @@ test-not-empty { /*! not empty */ }
     }
 }
 
-@import url('http://example.com/file.css');
+test-color {
+    color: #11223300;
+    color: #112233;
+    color: #112233ff;
+    color: #123456;
+    color: #123456ab;
+    color: #123;
+    color: #ABCDEF;
+    color: #FFFFFF;
+    color: #abcdef;
+    color: #fff;
+    color: #ffffff;
+    color: #ffffffff;
+    color: red;
+    color: rgb(0, 0, 1);
+    color: rgb( 255, 255, 0 );
+    color: rgba( 255, 255, 0, 0.5 );
+    color: yellow;
+}
 
 test-comment {
     /*! rgba( 255 , 255 , 255 , 0.5 ) */
 }
 
 test-function {
+    margin: calc( 12px - ( 50em * 12 / ( var(--test, 10) - 0.5px ) ) );
     color: rgb(255, 255, 255);
     color: rgb( 255 , 255,    255 );
     color: rgba(255, 255 ,  255, 0.5);
@@ -132,6 +157,10 @@ test-shorthand {
 }
 
 test-string {
+    content: '';
+    content: "";
+    content: '"';
+    content: "'";
     content: url('rgba( 255 , 255 , 255 , 0.5 )');
 }
 
@@ -164,6 +193,8 @@ misc {
     background: none;
     border: none;
     outline: none;
+    font: normal normal 16px/1.5 'font family', "font family", font family, sans-serif;
+    font: normal normal 16px/1.5 font family, sans-serif;
 }
 
 misc-no-trailing-comma {
