@@ -1,0 +1,39 @@
+<h1><?= $title; ?></h1>
+<div>
+<?php
+
+$test = <<<TEST
+  <div></div>
+TEST;
+
+/*! bug */
+$test = [1, <<<TEST
+  <div></div>
+TEST
+];
+
+/*! bug */
+test(1, <<<TEST
+  <div></div>
+TEST
+);
+
+$foo = ' $foo = "bar"; ' ;
+$foo = '<?php echo $foo; ?>';
+
+if ( $foo ) {
+    $bar = 1;
+} else if ( $bar < 4 ) {
+    $bar = 0;
+}
+
+$foo = fn( $bar = 4 ) => {
+    return 'true';
+};
+
+echo date('Y-m-d H:i:s', time( true ) );
+
+?>
+</div>
+
+<!-- <?php echo date('Y-m-d H:i:s', time( true ) ); ?> -->
