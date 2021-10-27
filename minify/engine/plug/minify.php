@@ -534,7 +534,6 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     $skip = true;
                     $doc = false; // Exit HEREDOC
                     for ($j = $i + 1; $j < $c; ++$j) {
-                        test($toks[$j]);
                         if (\is_string($toks[$j])) {
                             $out .= $toks[$j];
                             if (';' === $toks[$j]) {
