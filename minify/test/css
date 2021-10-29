@@ -1,12 +1,32 @@
-@charset 'UTF-8';
+@charset "UTF-8";
 
 @import url('http://example.com/file.css');
+@import url('http://example.com/file.css') screen;
+@import url('http://example.com/file.css') screen and (orientation: landscape);
 
 @font-face {
     font-family: 'font family';
     src : url('./path/to/file.woff') format('woff');
     font-weight: normal;
     font-style: normal;
+}
+
+@keyframes animation-1 {
+    from { margin: 0% }
+    to { margin: 100%; }
+}
+
+/*! test token contains number */
+.class-1,
+#id-1,
+tag-1,
+[attr-1],
+[attr="value 1"],
+:pseudo-1,
+::pseudo-1,
+:pseudo-1(1, 2, 3),
+::pseudo-1(1, 2, 3) {
+    property-1: value-1 value 1;
 }
 
 a {

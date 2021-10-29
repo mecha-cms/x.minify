@@ -3,13 +3,48 @@
 \define(__NAMESPACE__ . "\\token_boolean", '\b(?:true|false)\b');
 \define(__NAMESPACE__ . "\\token_number", '-?(?:(?:\d+)?\.)?\d+');
 \define(__NAMESPACE__ . "\\token_string", '(?:"(?:[^"\\\]|\\\.)*"|\'(?:[^\'\\\]|\\\.)*\')');
+\define(__NAMESPACE__ . "\\token_unicode", '\\[0-9a-f]{1,6}');
+
+\define(__NAMESPACE__ . "\\token_css_spec", '(?:[^\0-\237]|\\[a-f\d]{1,6}(?:\n\r|[ \f\n\r\t])?|\\[^a-f\d\f\n\r])');
 
 \define(__NAMESPACE__ . "\\token_css_combinator", '[~+>]');
-\define(__NAMESPACE__ . "\\token_css_comment", '/\*[\s\S]*?\*/');
+\define(__NAMESPACE__ . "\\token_css_comment", '/\*[^*]*\*+(?:[^/*][^*]*\*+)*/');
 \define(__NAMESPACE__ . "\\token_css_hack", '[!#$%&()*+,./:<=>?@\[\]_`|~]');
 \define(__NAMESPACE__ . "\\token_css_hex", '#(?:[a-f\d]{1,2}){3,4}');
 \define(__NAMESPACE__ . "\\token_css_property", '[a-z-][a-z\d-]*');
 \define(__NAMESPACE__ . "\\token_css_value", '(?:' . token_string . '|[^;])*');
+
+// <https://drafts.csswg.org/css2#tokenization>
+\define(__NAMESPACE__ . "\\token_css_name", '(?:_[a-z]|' . token_css_spec . ')(?:[_a-z\d-]|' . token_css_spec . ')*');
+\define(__NAMESPACE__ . "\\token_css_function", token_css_property . '\(\s*(?:' . token_string . '|[^};])*\s*\)');
+
+\define(__NAMESPACE__ . "\\token_css_selector_any", '[&*]');
+\define(__NAMESPACE__ . "\\token_css_selector_at", '@' . token_css_name);
+\define(__NAMESPACE__ . "\\token_css_selector_attr", '\[(?:' . token_string . '|[^]])*\]');
+\define(__NAMESPACE__ . "\\token_css_selector_class", '\.' . token_css_name);
+\define(__NAMESPACE__ . "\\token_css_selector_element", token_css_name);
+\define(__NAMESPACE__ . "\\token_css_selector_function", '::?' . token_css_function);
+\define(__NAMESPACE__ . "\\token_css_selector_id", '#' . token_css_name);
+\define(__NAMESPACE__ . "\\token_css_selector_pseudo", '::?' . token_css_property);
+
+\define(__NAMESPACE__ . "\\token_css_function_url", 'url\(\s*(?:' . token_string . '|[!#$%&*-\[\]-~]|' . token_css_name . ')\s*\)');
+
+// <https://drafts.csswg.org/css2#block>
+\define(__NAMESPACE__ . "\\token_css_block", '\{(?:' . token_string . '|[^{}]|(?R))*\}');
+// <https://drafts.csswg.org/css2#rule-sets>
+\define(__NAMESPACE__ . "\\token_css_rules", '(?:\s*(?:' . \implode('|', [
+    token_css_comment,
+    token_css_selector_function,
+    token_css_selector_pseudo,
+    token_css_selector_attr,
+    token_css_selector_any,
+    token_css_selector_at,
+    token_css_selector_class,
+    token_css_selector_id,
+    token_css_selector_element,
+    token_css_combinator,
+    '[^{};]'
+]) . ')\s*)+\s*' . token_css_block);
 
 // <https://www.w3.org/TR/css-values-4>
 \define(__NAMESPACE__ . "\\token_css_unit", '%|Hz|Q|cap|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|ic|in|kHz|lh|mm|ms|pc|pt|px|rad|rcap|rch|rem|rex|ric|rlh|s|turn|vb|vh|vi|vmax|vmin|vw');
@@ -35,8 +70,8 @@ function every(array $tokens, callable $fn = null, string $in = null, string $fl
     return $out;
 }
 
-function get_css_selector_rules($value) {
-    $rules = $selector = "";
+function get_css_rules($value) {
+    $block = $selector = "";
     $m = \preg_split('/(' . token_string . '|[{])/', $value, null, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
     while ($m) {
         if ('{' === ($v = \array_shift($m))) {
@@ -45,8 +80,8 @@ function get_css_selector_rules($value) {
         $selector .= $v;
     }
     $selector = \trim($selector);
-    $rules = \trim(\substr(\implode("", $m), 0, -1), ' ;');
-    return [$selector, $rules];
+    $block = \trim(\substr(\implode("", $m), 0, -1), ' ;');
+    return [$selector, $block];
 }
 
 function get_token_css_function($value) {
@@ -141,7 +176,7 @@ function minify_css_color($value) {
 function minify_css_unit($value) {
     $number = $value;
     $unit = "";
-    if (!\is_numeric($value) && \preg_match('/^(' . token_number . ')(' . token_css_property . '|%)$/i', $value, $m)) {
+    if (!\is_numeric($value) && \preg_match('/^(' . token_number . ')(' . token_css_unit . ')$/i', $value, $m)) {
         $number = $m[1];
         $unit = $m[2];
     }
@@ -184,11 +219,11 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
         return $value;
     }, $in);
     $out = every([
+        token_css_rules,
         token_css_comment,
-        // Match `@asdf` until `;`
-        '@' . token_css_property . '\s+(?:' . token_string . '|[^{};])+\s*;',
-        // Match selector and rule(s)
-        '@?(?:' . token_string . '|[^@{};])+\{\s*(?:' . token_string . '|[^{}]|(?R))*\s*\}'
+        '@charset\s+' . token_string . '\s*;',
+        '@import\s+' . token_string . '[^;]*;',
+        '@import\s+' . token_css_function_url . '[^;]*;',
     ], static function($value) {
         if (is_token_css_comment($value)) {
             return $value; // Keep!
@@ -200,30 +235,35 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             return "";
         }
         if ('@' === $value[0]) {
+            if (0 === \strpos($value, '@charset ')) {
+                return \strtolower(\strtr($value, "'", '"')); // Force double quote
+            }
             if (';' === \substr($value, -1)) {
                 $m = \explode(' ', $value, 2);
                 return $m[0] . ' ' . \substr(minify_css('x{x:' . $m[1] . '}'), 4, -1) . ';';
             }
-            list($selector, $rules) = get_css_selector_rules($value);
+            [$selector, $block] = get_css_rules($value);
             if ('@font-face' === $selector) {
-                return $selector . \substr(minify_css('x{' . $rules . '}'), 1);
+                return $selector . \substr(minify_css('x{' . $block . '}'), 1);
             }
             $selector = \preg_replace_callback('/\(\s*((?:' . token_string . '|[^()]|(?R))*)\s*\)/', static function($m) {
                 return '(' . \substr(minify_css('x{' . $m[1] . '}'), 2, -1) . ')';
             }, $selector);
-            return $selector . '{' . minify_css($rules) . '}';
+            return $selector . '{' . minify_css($block) . '}';
         }
         if ('}' === \substr($value, -1)) {
-            list($selector, $rules) = get_css_selector_rules($value);
+            [$selector, $block] = get_css_rules($value);
             $selector = every([
-                // Match nesting and global selector(s)
-                '\s*[&*]\s*',
-                // Match function-like pseudo class/element selector(s)
-                '\s*:{1,2}' . token_css_property . '\((?:' . token_string . '|[^()]|(?R))*\)\s*',
-                // Match pseudo class/element selector(s)
-                '\s*:{1,2}' . token_css_property . '\s*',
-                // Match attribute selector(s)
-                '\s*\[\s*(?:' . token_string . '|[^][]|(?R))*\s*\]\s*'
+                token_css_comment,
+                '\s*' . token_css_selector_function . '\s*',
+                '\s*' . token_css_selector_pseudo . '\s*',
+                '\s*' . token_css_selector_attr . '\s*',
+                '\s*' . token_css_selector_any . '\s*',
+                '\s*' . token_css_selector_class . '\s*',
+                '\s*' . token_css_selector_id . '\s*',
+                // '\s*' . token_css_selector_element . '\s*',
+                token_css_combinator,
+                '[,]'
             ], static function($value, $chop) {
                 if (':' === $value[0]) {
                     if (')' === \substr($value, -1)) {
@@ -254,10 +294,14 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                 }
                 return $chop;
             }, $selector);
-            $selector = every([token_string, token_css_combinator, '[,]'], static function($value) {
+            $selector = every([
+                token_string,
+                token_css_combinator,
+                '[,]'
+            ], static function($value) {
                 return $value;
             }, $selector);
-            $rules = every([token_css_comment, '[;]'], static function($value) {
+            $block = every([token_css_comment, '[;]'], static function($value) {
                 if (is_token_css_comment($value)) {
                     return $value;
                 }
@@ -319,15 +363,15 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     return $hack . $property . ':' . $v;
                 }
                 return $value;
-            }, $rules);
-            $rules = every([
+            }, $block);
+            $block = every([
                 token_css_comment,
                 // Match property
                 // FYI, that `(?<=^|;)` part was added to make sure that property comes
                 // at the beginning of the chunk, or just after the `;` character.
                 // I need to make sure that `http:` will not be captured as a property.
                 '(?<=^|;)' . token_css_hack . '?' . token_css_property . '\s*:\s*'
-                // ... other must be the value
+                // … other must be the value
             ], static function($value) {
                 if (is_token_css_comment($value)) {
                     return $value;
@@ -338,10 +382,8 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                 }
                 // Other(s)
                 return every([
-                    // Match function-like which contains only string
-                    token_css_property . '\(\s*' . token_string . '\s*\)',
-                    // Match function-like which may contains string
-                    token_css_property . '\(\s*(?:' . token_string . '|[^;])*\s*\)',
+                    token_css_function_url,
+                    token_css_function,
                     token_string,
                     token_css_hex,
                     token_css_number,
@@ -363,21 +405,21 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                             $params = \preg_replace_callback('/(' . token_number . '|\s*[*(),\/]\s*)/', static function($m) {
                                 return \is_numeric($m[1]) ? minify_number($m[1]) : \trim($m[1]);
                             }, $params);
-                            return 'calc(' . $params . ')';
+                            return ' calc(' . $params . ') ';
                         }
                         if ('format' === $name && "" !== $raw) {
                             // Cannot remove quote(s) in `format()` safely :(
-                            return "format('" . $raw . "')";
+                            return " format('" . $raw . "') ";
                         }
                         if ('url' === $name && "" !== $raw) {
                             // Only remove quote(s) around URL if it does not contain space character(s)
-                            return false !== \strpos($raw, ' ') ? "url('" . $raw . "')" : 'url(' . $raw . ')';
+                            return false !== \strpos($raw, ' ') ? " url('" . $raw . "') " : ' url(' . $raw . ') ';
                         }
                         // <https://www.w3.org/TR/css-color-4>
                         if (false !== \strpos(',color,device-cmyk,hsl,hsla,hwb,lab,lch,rgb,rgba,', ',' . $name . ',')) {
                             return minify_css_color($value);
                         }
-                        return $name . '(' . $params . ')';
+                        return ' ' . $name . '(' . $params . ') ';
                     }
                     if (is_token_css_hex($value)) {
                         return minify_css_color($value);
@@ -388,8 +430,8 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     }
                     return $value;
                 }, $value);
-            }, $rules);
-            $rules = every([token_css_comment, token_string, '[;,/]'], static function($value) {
+            }, $block);
+            $block = every([token_css_comment, token_string, '[;,/]'], static function($value) {
                 if (is_token_css_comment($value)) {
                     return $value;
                 }
@@ -400,17 +442,19 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     $raw = \substr($value, 1, -1);
                     return false !== \strpos($raw, "'") ? '"' . $raw . '"' : "'" . $raw . "'";
                 }
-                // Misc
+                // Miscellaneous…
                 return \strtr($value, [
+                    // `1px  1px` → `1px 1px`
                     '  ' => ' ',
+                    // `margin: 1px` → `margin:1px`
                     ': ' => ':',
                     'font-weight:bold' => 'font-weight:700',
                     'font-weight:normal' => 'font-weight:400',
                     'font:normal normal ' => 'font:',
-                    'font:normal ' => 'font:400 '
+                    'font:normal ' => 'font:400 ',
                 ]);
-            }, $rules);
-            return $selector . '{' . $rules . '}';
+            }, $block);
+            return $selector . '{' . $block . '}';
         }
         return $value;
     }, $out);
@@ -429,7 +473,7 @@ function minify_json(string $in, int $comment = 2, int $quote = 1) {
 function minify_php(string $in, int $comment = 2, int $quote = 1) {
     $out = "";
     $t = [];
-    // White-space(s) around these token(s) can be removed
+    // White-space(s) around these token(s) can be removed :)
     foreach ([
         'AND_EQUAL',
         'ARRAY_CAST',
@@ -592,6 +636,9 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
             $skip = true;
         }
     }
+    every(['\s*' . token_string . '\s*'], static function($value, $chop) {
+
+    }, $out);
     return $out;
 }
 
