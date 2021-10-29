@@ -11,22 +11,69 @@
     font-style: normal;
 }
 
-@keyframes animation-1 {
+@keyframes foo {
+    0% { margin: 10px; }
+    0.5% { margin: 10px; }
+    0.50% { margin: 10px; }
+    100% { margin: 10px; }
     from { margin: 0% }
     to { margin: 100%; }
 }
 
 /*! test token contains number */
-.class-1,
-#id-1,
-tag-1,
-[attr-1],
-[attr="value 1"],
-:pseudo-1,
+#id-0px,
+#id-1px,
+.class-0px,
+.class-1px,
+::pseudo-0(1, 2, 3),
+::pseudo-0,
+::pseudo-1(1, 2, 3),
 ::pseudo-1,
+:pseudo-0(1, 2, 3),
+:pseudo-0,
 :pseudo-1(1, 2, 3),
-::pseudo-1(1, 2, 3) {
-    property-1: value-1 value 1;
+:pseudo-1,
+[attr-0px],
+[attr-1px],
+[attr="value -0px"],
+[attr="value -1px"],
+[attr="value 0px"],
+[attr="value 1px"],
+tag-0px,
+tag-1px
+{
+    --test-0px: 0;
+    --test-1px: 0;
+    test-0px: 0;
+    test-1px: 0;
+    property: value-1px;
+    property: value -1px;
+    property: value 1px;
+}
+
+/*! test token contains escape */
+#id\:0px,
+#id\:1px,
+.class\:0px,
+.class\:1px,
+::pseudo\:0(1, 2, 3),
+::pseudo\:0,
+::pseudo\:1(1, 2, 3),
+::pseudo\:1,
+:pseudo\:0(1, 2, 3),
+:pseudo\:0,
+:pseudo\:1(1, 2, 3),
+:pseudo\:1,
+[attr\:0px],
+[attr\:1px],
+[attr="value \:0px"],
+[attr="value \:1px"],
+[attr="value 0px"],
+[attr="value 1px"],
+tag\:0px,
+tag\:1px
+{
+    test: 0;
 }
 
 a {
@@ -147,6 +194,9 @@ test-color {
     color: rgb(0, 0, 1);
     color: rgb( 255, 255, 0 );
     color: rgba( 255, 255, 0, 0.5 );
+    color: transparent;
+    color: rgba( 0 , 0 , 0 , 0 );
+    color: rgba( 0 0 0 / 0 );
     color: yellow;
 }
 
@@ -177,10 +227,11 @@ test-shorthand {
 }
 
 test-string {
-    content: '';
     content: "";
-    content: '"';
     content: "'";
+    content: '"';
+    content: '';
+    content: url('http://example.com/file.jpg');
     content: url('rgba( 255 , 255 , 255 , 0.5 )');
 }
 

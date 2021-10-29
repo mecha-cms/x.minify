@@ -29,8 +29,161 @@
 
 \define(__NAMESPACE__ . "\\token_css_function_url", 'url\(\s*(?:' . token_string . '|[!#$%&*-\[\]-~]|' . token_css_name . ')\s*\)');
 
+// List of color name(s)
+\define(__NAMESPACE__ . "\\tokens_css_color", [
+    'aliceblue' => '#f0f8ff',
+    'antiquewhite' => '#faebd7',
+    'aqua' => '#00ffff',
+    'aquamarine' => '#7fffd4',
+    'azure' => '#f0ffff',
+    'beige' => '#f5f5dc',
+    'bisque' => '#ffe4c4',
+    'black' => '#000000',
+    'blanchedalmond' => '#ffebcd',
+    'blue' => '#0000ff',
+    'blueviolet' => '#8a2be2',
+    'brown' => '#a52a2a',
+    'burlywood' => '#deb887',
+    'cadetblue' => '#5f9ea0',
+    'chartreuse' => '#7fff00',
+    'chocolate' => '#d2691e',
+    'coral' => '#ff7f50',
+    'cornflowerblue' => '#6495ed',
+    'cornsilk' => '#fff8dc',
+    'crimson' => '#dc143c',
+    'cyan' => '#00ffff',
+    'darkblue' => '#00008b',
+    'darkcyan' => '#008b8b',
+    'darkgoldenrod' => '#b8860b',
+    'darkgray' => '#a9a9a9',
+    'darkgreen' => '#006400',
+    'darkgrey' => '#a9a9a9',
+    'darkkhaki' => '#bdb76b',
+    'darkmagenta' => '#8b008b',
+    'darkolivegreen' => '#556b2f',
+    'darkorange' => '#ff8c00',
+    'darkorchid' => '#9932cc',
+    'darkred' => '#8b0000',
+    'darksalmon' => '#e9967a',
+    'darkseagreen' => '#8fbc8f',
+    'darkslateblue' => '#483d8b',
+    'darkslategray' => '#2f4f4f',
+    'darkslategrey' => '#2f4f4f',
+    'darkturquoise' => '#00ced1',
+    'darkviolet' => '#9400d3',
+    'deeppink' => '#ff1493',
+    'deepskyblue' => '#00bfff',
+    'dimgray' => '#696969',
+    'dimgrey' => '#696969',
+    'dodgerblue' => '#1e90ff',
+    'firebrick' => '#b22222',
+    'floralwhite' => '#fffaf0',
+    'forestgreen' => '#228b22',
+    'fuchsia' => '#ff00ff',
+    'gainsboro' => '#dcdcdc',
+    'ghostwhite' => '#f8f8ff',
+    'goldenrod' => '#daa520',
+    'gold' => '#ffd700',
+    'gray' => '#808080',
+    'green' => '#008000',
+    'greenyellow' => '#adff2f',
+    'grey' => '#808080',
+    'honeydew' => '#f0fff0',
+    'hotpink' => '#ff69b4',
+    'indianred' => '#cd5c5c',
+    'indigo' => '#4b0082',
+    'ivory' => '#fffff0',
+    'khaki' => '#f0e68c',
+    'lavenderblush' => '#fff0f5',
+    'lavender' => '#e6e6fa',
+    'lawngreen' => '#7cfc00',
+    'lemonchiffon' => '#fffacd',
+    'lightblue' => '#add8e6',
+    'lightcoral' => '#f08080',
+    'lightcyan' => '#e0ffff',
+    'lightgoldenrodyellow' => '#fafad2',
+    'lightgray' => '#d3d3d3',
+    'lightgreen' => '#90ee90',
+    'lightgrey' => '#d3d3d3',
+    'lightpink' => '#ffb6c1',
+    'lightsalmon' => '#ffa07a',
+    'lightseagreen' => '#20b2aa',
+    'lightskyblue' => '#87cefa',
+    'lightslategray' => '#778899',
+    'lightslategrey' => '#778899',
+    'lightsteelblue' => '#b0c4de',
+    'lightyellow' => '#ffffe0',
+    'lime' => '#00ff00',
+    'limegreen' => '#32cd32',
+    'linen' => '#faf0e6',
+    'magenta' => '#ff00ff',
+    'maroon' => '#800000',
+    'mediumaquamarine' => '#66cdaa',
+    'mediumblue' => '#0000cd',
+    'mediumorchid' => '#ba55d3',
+    'mediumpurple' => '#9370db',
+    'mediumseagreen' => '#3cb371',
+    'mediumslateblue' => '#7b68ee',
+    'mediumspringgreen' => '#00fa9a',
+    'mediumturquoise' => '#48d1cc',
+    'mediumvioletred' => '#c71585',
+    'midnightblue' => '#191970',
+    'mintcream' => '#f5fffa',
+    'mistyrose' => '#ffe4e1',
+    'moccasin' => '#ffe4b5',
+    'navajowhite' => '#ffdead',
+    'navy' => '#000080',
+    'oldlace' => '#fdf5e6',
+    'olive' => '#808000',
+    'olivedrab' => '#6b8e23',
+    'orange' => '#ffa500',
+    'orangered' => '#ff4500',
+    'orchid' => '#da70d6',
+    'palegoldenrod' => '#eee8aa',
+    'palegreen' => '#98fb98',
+    'paleturquoise' => '#afeeee',
+    'palevioletred' => '#db7093',
+    'papayawhip' => '#ffefd5',
+    'peachpuff' => '#ffdab9',
+    'peru' => '#cd853f',
+    'pink' => '#ffc0cb',
+    'plum' => '#dda0dd',
+    'powderblue' => '#b0e0e6',
+    'purple' => '#800080',
+    'rebeccapurple' => '#663399',
+    'red' => '#ff0000',
+    'rosybrown' => '#bc8f8f',
+    'royalblue' => '#4169e1',
+    'saddlebrown' => '#8b4513',
+    'salmon' => '#fa8072',
+    'sandybrown' => '#f4a460',
+    'seagreen' => '#2e8b57',
+    'seashell' => '#fff5ee',
+    'sienna' => '#a0522d',
+    'silver' => '#c0c0c0',
+    'skyblue' => '#87ceeb',
+    'slateblue' => '#6a5acd',
+    'slategray' => '#708090',
+    'slategrey' => '#708090',
+    'snow' => '#fffafa',
+    'springgreen' => '#00ff7f',
+    'steelblue' => '#4682b4',
+    'tan' => '#d2b48c',
+    'teal' => '#008080',
+    'thistle' => '#d8bfd8',
+    'tomato' => '#ff6347',
+    'turquoise' => '#40e0d0',
+    'violet' => '#ee82ee',
+    'wheat' => '#f5deb3',
+    'white' => '#ffffff',
+    'whitesmoke' => '#f5f5f5',
+    'yellow' => '#ffff00',
+    'yellowgreen' => '#9acd32'
+]);
+
 // <https://drafts.csswg.org/css2#block>
 \define(__NAMESPACE__ . "\\token_css_block", '\{(?:' . token_string . '|[^{}]|(?R))*\}');
+
 // <https://drafts.csswg.org/css2#rule-sets>
 \define(__NAMESPACE__ . "\\token_css_rules", '(?:\s*(?:' . \implode('|', [
     token_css_comment,
@@ -144,13 +297,21 @@ function minify_number($value) {
 function minify_css_color($value) {
     if ('#' === $value[0]) {
         $value = \strtolower(\preg_replace('/^#([a-f\d])\1([a-f\d])\2([a-f\d])\3(?:([a-f\d])\4)?$/i', '#$1$2$3$4', $value));
-        if (9 === \strlen($value) && 'ff' === \substr($value, -2)) {
-            return \substr($value, 0, -2); // Solid HEX color
+        // Remove solid alpha channel from HEX color
+        if (9 === \strlen($value)) {
+            if ('ff' === \substr($value, -2)) {
+                $value = \substr($value, 0, -2);
+            } else if ('00' === \substr($value, -2)) {
+                $value = 'transparent';
+            }
+        } else if (5 === \strlen($value)) {
+            if ('f' === \substr($value, -1)) {
+                $value = \substr($value, 0, -1);
+            } else if ('0' === \substr($value, -1)) {
+                $value = 'transparent';
+            }
         }
-        if (5 === \strlen($value) && 'f' === \substr($value, -1)) {
-            return \substr($value, 0, -1); // Solid HEX color
-        }
-        return $value;
+        return tokens_css_color[$value] ?? $value;
     }
     $value = \preg_replace('/\s*([(),\/])\s*/', '$1', $value);
     if (0 === \strpos($value, 'rgba(')) {
@@ -240,6 +401,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             }
             if (';' === \substr($value, -1)) {
                 $m = \explode(' ', $value, 2);
+                // TODO
                 return $m[0] . ' ' . \substr(minify_css('x{x:' . $m[1] . '}'), 4, -1) . ';';
             }
             [$selector, $block] = get_css_rules($value);
@@ -301,126 +463,141 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             ], static function($value) {
                 return $value;
             }, $selector);
-            $block = every([token_css_comment, '[;]'], static function($value) {
+            $property = null; // Store current property
+            $block = every([
+                token_css_comment,
+                token_css_function_url,
+                token_css_function,
+                // Match property
+                token_css_hack . '?' . token_css_property . '\s*:\s*'
+                // … other must be the value
+            ], static function($value) use(&$property) {
                 if (is_token_css_comment($value)) {
                     return $value;
                 }
-                // Minify shorthand value(s)
-                if (\preg_match('/^(' . \strtr(token_css_hack, ['/' => "\\/"]) . '?)(background|border(?:-(?:width|radius))?|margin|padding|outline)\s*:\s*(' . token_css_value . ')\s*$/i', $value, $m)) {
-                    $hack = $m[1];
-                    $property = $m[2];
-                    $v = $m[3];
-                    if ('background' === $property && ('none' === $v || 'transparent' === $v)) {
-                        return $hack . $property . ':0 0';
+                // `margin:`
+                if (':' === \substr($value, -1)) {
+                    $property = \trim(\substr($value, 0, -1));
+                    return $property . ':';
+                }
+                $end = ';' === \substr($value, -1) ? ';' : "";
+                $value = \rtrim($value, ';'); // Remove semi-colon
+                if ('background' === $property) {
+                    if ('none' === $value || 'transparent' === $value) {
+                        return '0 0' . $end;
                     }
-                    if ('none' === $v) {
-                        return $hack . $property . ':0';
+                    return $value . $end;
+                }
+                if (
+                    'border' === $property ||
+                    'border-radius' === $property ||
+                    'border-width' === $property ||
+                    'outline' === $property
+                ) {
+                    if ('none' === $value) {
+                        return '0' . $end;
                     }
+                    return $value . $end;
+                }
+                if (
+                    'margin' === $property ||
+                    'padding' === $property
+                ) {
                     $unit = '(' . token_css_number . '|' . token_number . ')';
                     // `1px 0 1px 0`
-                    if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $v, $m)) {
+                    if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $value, $m)) {
                         $m[1] = minify_css_unit($m[1]);
                         $m[2] = minify_css_unit($m[2]);
                         $m[3] = minify_css_unit($m[3]);
                         $m[4] = minify_css_unit($m[4]);
                         if ($m[1] === $m[3] && $m[2] === $m[4] && $m[1] !== $m[2] && $m[3] !== $m[4]) {
                             // `1px 0`
-                            return $hack . $property . ':' . $m[1] . ' ' . $m[2];
+                            return $m[1] . ' ' . $m[2] . $end;
                         }
                         if ($m[1] === $m[2] && $m[2] === $m[3] && $m[3] === $m[4]) {
                             // `1px`
-                            return $hack . $property . ':' . $m[1];
+                            return $m[1] . $end;
                         }
                     }
                     // `1px 0 1px`
-                    if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $v, $m)) {
+                    if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $value, $m)) {
                         $m[1] = minify_css_unit($m[1]);
                         $m[2] = minify_css_unit($m[2]);
                         $m[3] = minify_css_unit($m[3]);
                         if ($m[1] === $m[3] && $m[1] !== $m[2]) {
                             // `1px 0`
-                            return $hack . $property . ':' . $m[1] . ' ' . $m[2];
+                            return $m[1] . ' ' . $m[2] . $end;
                         }
                         if ($m[1] === $m[2] && $m[2] === $m[3]) {
                             // `1px`
-                            return $hack . $property . ':' . $m[1];
+                            return $m[1] . $end;
                         }
                     }
                     // `1px 0`
-                    if (\preg_match('/^' . $unit . ' ' . $unit . '$/i', $v, $m)) {
+                    if (\preg_match('/^' . $unit . ' ' . $unit . '$/i', $value, $m)) {
                         $m[1] = minify_css_unit($m[1]);
                         $m[2] = minify_css_unit($m[2]);
                         if ($m[1] === $m[2]) {
                             // `1px`
-                            return $hack . $property . ':' . $m[1];
+                            return $m[1] . $end;
                         }
                     }
                     // `1px`
-                    if (\preg_match('/^' . $unit . '$/i', $v, $m)) {
+                    if (\preg_match('/^' . $unit . '$/i', $value, $m)) {
                         $m[1] = minify_css_unit($m[1]);
-                        return $hack . $property . ':' . $m[1];
+                        return $m[1] . $end;
                     }
-                    return $hack . $property . ':' . $v;
+                    // Continue...
                 }
-                return $value;
-            }, $block);
-            $block = every([
-                token_css_comment,
-                // Match property
-                // FYI, that `(?<=^|;)` part was added to make sure that property comes
-                // at the beginning of the chunk, or just after the `;` character.
-                // I need to make sure that `http:` will not be captured as a property.
-                '(?<=^|;)' . token_css_hack . '?' . token_css_property . '\s*:\s*'
-                // … other must be the value
-            ], static function($value) {
-                if (is_token_css_comment($value)) {
-                    return $value;
+                // No space, this must be a keyword!
+                if (false === \strpos($value, ' ')) {
+                    if (is_token_css_hex($value)) {
+                        return minify_css_color($value) . $end;
+                    }
+                    return $value . $end;
                 }
-                // `margin:`
-                if (':' === \substr($value, -1)) {
-                    return \strtr($value, [' ' => ""]);
+                if ($m = get_token_css_function($value)) {
+                    $name = $m[0];
+                    $params = $m[1];
+                    // Prepare to remove quote(s) from string-only argument in function
+                    if ($params && is_token_string($params)) {
+                        $raw = \substr($params, 1, -1);
+                    }
+                    if ('calc' === $name) {
+                        // Only minify the number, do not remove the unit for now. I have no idea how
+                        // this `calc()` thing works in handling the unit(s). As far as I know, the only
+                        // valid unit-less number is when they are used as the divisor/multiplicator.
+                        // We can remove the space between `(` and `)` safely.
+                        $params = \trim(\preg_replace_callback('/' . token_number . '/', static function($m) {
+                            return minify_number($m[0]);
+                        }, $params));
+                        return ' calc(' . \strtr($params, [
+                            '( ' => '(',
+                            ' )' => ')'
+                        ]) . ') ';
+                    }
+                    if ('format' === $name && "" !== $raw) {
+                        // Cannot remove quote(s) in `format()` safely :(
+                        return " format('" . $raw . "') ";
+                    }
+                    if ('url' === $name && "" !== $raw) {
+                        // Only remove quote(s) around URL if it does not contain space character(s)
+                        return false !== \strpos($raw, ' ') ? " url('" . $raw . "') " : ' url(' . $raw . ') ';
+                    }
+                    // <https://www.w3.org/TR/css-color-4>
+                    if (false !== \strpos(',color,device-cmyk,hsl,hsla,hwb,lab,lch,rgb,rgba,', ',' . $name . ',')) {
+                        return minify_css_color($value);
+                    }
+                    return ' ' . $name . '(' . $params . ') ';
                 }
+                $value .= $end; // Restore semi-colon
                 // Other(s)
                 return every([
-                    token_css_function_url,
-                    token_css_function,
                     token_string,
                     token_css_hex,
                     token_css_number,
                     token_number
                 ], static function($value) {
-                    // `format('woff')`
-                    if ($m = get_token_css_function($value)) {
-                        $name = $m[0];
-                        $params = $m[1];
-                        // Prepare to remove quote(s) from string-only argument in function
-                        if ($params && is_token_string($params)) {
-                            $raw = \substr($params, 1, -1);
-                        }
-                        if ('calc' === $name) {
-                            // Only minify the number, do not remove the unit for now. I have no idea how
-                            // this `calc()` thing works in handling the unit(s). As far as I know, the only
-                            // valid unit-less number is when they are used as the divisor/multiplicator.
-                            // We can remove the space around `*`, `(`, `)` and `/` character safely.
-                            $params = \preg_replace_callback('/(' . token_number . '|\s*[*(),\/]\s*)/', static function($m) {
-                                return \is_numeric($m[1]) ? minify_number($m[1]) : \trim($m[1]);
-                            }, $params);
-                            return ' calc(' . $params . ') ';
-                        }
-                        if ('format' === $name && "" !== $raw) {
-                            // Cannot remove quote(s) in `format()` safely :(
-                            return " format('" . $raw . "') ";
-                        }
-                        if ('url' === $name && "" !== $raw) {
-                            // Only remove quote(s) around URL if it does not contain space character(s)
-                            return false !== \strpos($raw, ' ') ? " url('" . $raw . "') " : ' url(' . $raw . ') ';
-                        }
-                        // <https://www.w3.org/TR/css-color-4>
-                        if (false !== \strpos(',color,device-cmyk,hsl,hsla,hwb,lab,lch,rgb,rgba,', ',' . $name . ',')) {
-                            return minify_css_color($value);
-                        }
-                        return ' ' . $name . '(' . $params . ') ';
-                    }
                     if (is_token_css_hex($value)) {
                         return minify_css_color($value);
                     }
