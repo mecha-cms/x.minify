@@ -1,0 +1,69 @@
+<ul>
+  <li>text</li>
+  <li><a href="#">text</a></li>
+  <li>   text   </li>
+  <li>   <a href="#">text</a>   </li>
+  <li>   text <ul>
+      <li> text </li>
+    </ul>
+  </li>
+  <li>   <a href="#">text</a> <ul>
+      <li> text </li>
+    </ul>
+  </li>
+</ul>
+
+<!--
+
+<div>
+  text text text
+</div>
+
+-->
+
+<pre><code>function foo(bar = 'baz') {
+    return bar ?? 'qux';
+}
+</code></pre>
+
+<script>
+  const element = 'text <div class="foo" id="foo"> text </div> text';
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": {
+    "generatedAt": {
+      "@id": "http://www.w3.org/ns/prov#generatedAtTime",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "Person": "http://xmlns.com/foaf/0.1/Person",
+    "name": "http://xmlns.com/foaf/0.1/name",
+    "knows": "http://xmlns.com/foaf/0.1/knows"
+  },
+  "@id": "http://example.org/graphs/73",
+  "generatedAt": "2012-04-09",
+  "@graph":
+  [
+    {
+      "@id": "http://manu.sporny.org/about#manu",
+      "@type": "Person",
+      "name": "Manu Sporny",
+      "knows": "http://greggkellogg.net/foaf#me"
+    },
+    {
+      "@id": "http://greggkellogg.net/foaf#me",
+      "@type": "Person",
+      "name": "Gregg Kellogg",
+      "knows": "http://manu.sporny.org/about#manu"
+    }
+  ]
+}
+</script>
+
+<style>
+  /* text <div> text </div> text */
+  h1, h2, h3, h4, h5, h6 {
+    color: rgba( 255, 255, 1, 0.5 );
+  }
+</style>
