@@ -262,6 +262,7 @@ test-unit {
 
 misc {
     background: none;
+    background: white url('./file.jpg') no-repeat 0 0;
     border: none;
     outline: none;
     font: normal normal 16px/1.5 'font family', "font family", font family, sans-serif;
