@@ -1,0 +1,90 @@
+import foo from 'foo';
+
+import { bar as baz } from 'bar';
+
+/*! keep */
+var foo = 1;
+/** keep */
+var bar = 1;
+/* @preserve keep */
+var baz = 1;
+
+/* remove */
+
+// remove
+
+function foo ( bar ) {
+    return { baz: 'qux' };
+}
+
+return [ 1 , 2 , 3 ];
+
+return { foo : 1 , bar : 2 };
+
+return false;
+
+return null;
+
+return true;
+
+return 0;
+
+return 1;
+
+return 0.5;
+
+return .5;
+
+return -0;
+
+return -1;
+
+return -0.5;
+
+return -.5;
+
+// http://example.com
+// 'http://example.com'
+// //example.com
+// '//example.com'
+
+test = '//example.com';
+test = 'http://example.com';
+
+for ( let i = 0, j = data.length; i < j; ++i ) {
+    console.log( data[ i ] );
+}
+
+test = [0.5 , -0, -0.120];
+
+switch ( foo ) {
+    case 0 :
+        foo = 0;
+        break;
+    case 1 :
+        foo = 1;
+        bar = foo;
+        break;
+    default :
+        foo = bar = false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

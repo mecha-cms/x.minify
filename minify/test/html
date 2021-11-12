@@ -29,10 +29,12 @@ version="1.0"
 
 -->
 
-<pre><code>function foo(bar = 'baz') {
+<pre>
+<code>function foo(bar = 'baz') {
     return bar ?? 'qux';
 }
-</code></pre>
+</code>
+</pre>
 
 <script>
   const element = 'text <div class="foo" id="foo"> text </div> text';
@@ -78,12 +80,13 @@ version="1.0"
 
 <!-- @preserve keep space in these situation(s) -->
 
-text text <img alt="" src="./file.jpg"> text text
 text text <button> text </button> <input type="text"> text text
-text text <input> <input> text text
-text text <void/> text text
+text text <code> text </code> text text
 text text <contain> text </contain> <void/> text text
+text text <img alt="" src="./file.jpg"> text text
+text text <input> <input> text text
 text text <void/> <void/> text text
+text text <void/> text text
 
 <div
 class="foo"

@@ -224,6 +224,9 @@ $n = __NAMESPACE__;
 
 \define($n . "\\token_html_entity", '&(?:[a-z\d]+|#\d+|#x[a-f\d]+);');
 
+\define($n . "\\token_js_comment", token_css_comment);
+\define($n . "\\token_js_comment_2", '//[^\n]*');
+
 function every(array $tokens, callable $fn = null, string $in = null, string $flag = 'i') {
     if ("" === ($in = \trim($in))) {
         return "";
@@ -267,9 +270,14 @@ function get_css_function($token) {
 
 function get_html_name($token) {
     if (is_token_element($token)) {
-        return \preg_split('/\s+/', \trim($token, '<>'), 2);
+        $m = \preg_split('/\s+/', \trim(\trim($token, '<>')), 2);
+        return [$m[0], $m[1] ?? ""];
     }
     return [];
+}
+
+function is_token_boolean($token) {
+    return 'false' === $token || 'true' === $token;
 }
 
 function is_token_element($token) {
@@ -314,6 +322,10 @@ function is_token_html_comment($token) {
 
 function is_token_html_entity($token) {
     return '&' === $token[0] && ';' === \substr($token, -1);
+}
+
+function is_token_js_comment($token) {
+    return 0 === \strpos($token, '//') || '/*' === \substr($token, 0, 2) && '*/' === \substr($token, -2);
 }
 
 function minify_number($token) {
@@ -711,8 +723,8 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
 }
 
 function minify_html_content($token, $tag, $fn) {
-    return \preg_replace_callback('/^<' . $tag . '(\s(?:' . token_string . '|[^>])*)?>([\s\S]*?)<\/' . $tag . '>$/i', static function($m) use($fn, $tag) {
-        return minify_html_element('<' . $tag . $m[1] . '>') . \call_user_func($fn, $m[2]) . '</' . $tag . '>';
+    return \preg_replace_callback('/^(\s*)<' . $tag . '(\s(?:' . token_string . '|[^>])*)?>([\s\S]*?)<\/' . $tag . '>(\s*)$/i', static function($m) use($fn, $tag) {
+        return $m[1] . minify_html_element('<' . $tag . $m[2] . '>') . \call_user_func($fn, $m[3]) . '</' . $tag . '>' . $m[4];
     }, $token);
 }
 
@@ -782,8 +794,8 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
                 return ' ';
             }, $chop);
         }
-        if ('</pre>' === \substr($token, -6)) {
-            return $token; // TODO
+        if ('</pre>' === \substr($token, -6) || '</textarea>' === \substr($token, 11)) {
+            return $token;
         }
         if ('</script>' === \substr($token, -9)) {
             return minify_html_content($token, 'script', static function($v) use($token) {
@@ -801,11 +813,17 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
             });
         }
         if (is_token_element($token)) {
-            if ('</' === \substr($token, 0, 2)) {
-                $chop = \ltrim($chop);
-            } else if ('/>' !== \substr($token, -2)) {
-                if (false === \strpos(',img,input,', ',' . get_html_name($token)[0] . ',')) {
-                    $chop = \rtrim($chop);
+            if ('</code>' === \substr($token, -7)) {
+                $chop = minify_html_content($chop, 'code', static function($v) {
+                    return minify_html($v);
+                });
+            } else {
+                if ('</' === \substr($token, 0, 2)) {
+                    $chop = \ltrim($chop);
+                } else if ('/>' !== \substr($token, -2)) {
+                    if (false === \strpos(',img,input,', ',' . get_html_name($token)[0] . ',')) {
+                        $chop = \rtrim($chop);
+                    }
                 }
             }
             if (' <' === \substr($chop, 0, 2) || '> ' === \substr($chop, -2)) {
@@ -821,7 +839,63 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
 }
 
 function minify_js(string $in, int $comment = 2, int $quote = 1) {
-    $out = $in;
+    if ("" === ($in = \trim($in))) {
+        return "";
+    }
+    $out = every([
+        token_js_comment,
+        token_string,
+        token_js_comment_2
+    ], static function($token) use($comment) {
+        if (1 === $comment) {
+            return $token;
+        }
+        if (is_token_js_comment($token)) {
+            if (2 === $comment) {
+                if (
+                    // Detect special comment(s) from the third character.
+                    // Should be an `!` or `*` → `/*! asdf */` or `/** asdf */`
+                    isset($token[2]) && false !== \strpos('!*', $token[2]) ||
+                    // Detect license comment(s) from the content phrase.
+                    // It should contains character(s) like `@license`
+                    false !== \strpos($token, '@licence') || // noun
+                    false !== \strpos($token, '@license') || // verb
+                    false !== \strpos($token, '@preserve')
+                ) {
+                    return $token;
+                }
+            }
+            return ""; // Remove!
+        }
+        return $token;
+    }, $in);
+    $out = every([
+        token_js_comment,
+        token_js_comment_2,
+        token_string,
+        token_boolean,
+        token_number,
+        '\b(?:case|return|typeof|void)\s*(?=[-.\d])',
+        '[%&()*+,\-/:;<=>?\[\]^{|}]'
+    ], static function($token, $chop) {
+        if (is_token_js_comment($token) || is_token_string($token)) {
+            return $token;
+        }
+        $token = \preg_replace('/\s+/', ' ', $token);
+        if (is_token_boolean($token)) {
+            return [
+                'false' => '!1',
+                'true' => '!0'
+            ][$token];
+        }
+        if (is_token_number($token)) {
+            return minify_number($token);
+        }
+        if ('case ' === $chop || 'return ' === $chop) {
+            return $chop;
+        }
+        return $token;
+    }, $out);
     return $out;
 }
 
