@@ -6,7 +6,7 @@ Release Notes
 
 ### 2.6.0
 
- - [ ] Refactor.
+ - Refactor.
 
 ### 2.5.7
 
