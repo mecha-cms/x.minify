@@ -18,7 +18,7 @@ This extension reduces the page size by removing unused white-spaces and comment
     '.html' => [2, 1],
     '.js' => [2],
     '.json' => [],
-    '.php' => []
+    '.php' => [2]
 ]
 ~~~
 
@@ -92,8 +92,8 @@ echo Minify::CSS('* {
 
 html {
   background: #fff;
-  font: normal normal 13px/1.5 Helmet, FreeSans, sans-serif;
   color: #000;
+  font: normal normal 16px/1.25 sans-serif;
 }');
 ~~~
 

@@ -36,6 +36,14 @@ version="1.0"
 </code>
 </pre>
 
+<textarea
+class="foo"
+id="bar"
+>
+{ "foo" : "bar" }
+{ "foo" : "bar" }
+</textarea>
+
 <script>
   const element = 'text <div class="foo" id="foo"> text </div> text';
 </script>

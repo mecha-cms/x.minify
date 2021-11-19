@@ -1,0 +1,4 @@
+{
+    "foo" : "bar" , "baz" : 1,
+    "qux" : [ "foo" , "bar" , true , false ]
+}

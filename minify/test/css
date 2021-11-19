@@ -20,6 +20,14 @@
     to { margin: 100%; }
 }
 
+/* remove */
+
+/*! keep */
+
+/** keep */
+
+/* @preserve keep */
+
 /*! test token contains number */
 #id-0px,
 #id-1px,

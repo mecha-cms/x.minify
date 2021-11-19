@@ -69,22 +69,20 @@ switch ( foo ) {
         foo = bar = false;
 }
 
+if (/ foo /.test(bar)) {}
+if (foo.match(/ bar /)) {}
 
+return foo.replace(/ bar /g, 'qux');
 
+test['foo']['bar']['baz']['qux'];
+test['foo-bar']['baz']['qux'];
 
+test = {
+    "foo" : "bar",
+    "baz": "qux",
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+test = {
+    "foo-bar" : "baz",
+    "qux": true,
+};
