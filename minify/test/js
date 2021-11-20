@@ -17,6 +17,10 @@ function foo ( bar ) {
     return { baz: 'qux' };
 }
 
+window.setTimeout(() => {
+    window.alert(window.location.href);
+}, 100);
+
 return [ 1 , 2 , 3 ];
 
 return { foo : 1 , bar : 2 };
@@ -50,6 +54,24 @@ return -.5;
 
 test = '//example.com';
 test = 'http://example.com';
+
+test = `
+aaa
+aaa
+aaa
+  aaa
+  aaa
+  aaa
+aaa
+aaa
+aaa
+`;
+
+test = ( foo , bar ) => foo + bar;
+
+test = ( foo ) => foo + 4;
+
+test = `aaa ${ window.location.hostname } aaa ${ 0.5 + 1.50 + (a / b) }`;
 
 for ( let i = 0, j = data.length; i < j; ++i ) {
     console.log( data[ i ] );
@@ -86,3 +108,5 @@ test = {
     "foo-bar" : "baz",
     "qux": true,
 };
+
+test = [123456789, -123456789, 0.123456789, -0.123456789];

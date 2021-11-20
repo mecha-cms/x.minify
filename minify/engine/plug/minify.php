@@ -228,6 +228,7 @@ $n = __NAMESPACE__;
 \define($n . "\\token_js_comment_2", '//[^\n]*');
 \define($n . "\\token_js_name", '[a-z$_][a-z$_\d]*');
 \define($n . "\\token_js_pattern", '/(?:(?![*+?])(?:[^\n\[/\\\]|\\\.|\[(?:[^\n\]\\\]|\\\.)*\])+)/[gimuy]*');
+\define($n . "\\token_js_string", '`(?:[^`\\\]|\\\.)*`');
 
 function every(array $tokens, callable $fn = null, string $in = null, string $flag = 'i') {
     if ("" === ($in = \trim($in))) {
@@ -337,6 +338,10 @@ function is_token_js_pattern($token) {
     return '/' === $token[0] && '/' === \substr($token, -1);
 }
 
+function is_token_js_string($token) {
+    return is_token_string($token) || '`' === $token[0] && '`' === \substr($token, -1);
+}
+
 function minify_number($token) {
     if ('-' === $token[0] && \strlen($token) > 1) {
         $number = minify_number(\substr($token, 1));
@@ -354,6 +359,17 @@ function minify_number($token) {
         return ('0.' === \substr($token, 0, 2) ? \substr($token, 1) : $token);
     }
     return $token;
+}
+
+// <https://stackoverflow.com/a/21417604/1163000>
+function minify_number_long($token) {
+    if ('0' === $token) {
+        return $token;
+    }
+    $x = '-' === $token[0] ? '-' : "";
+    $token = (float) ($x ? \substr($token, 1) : $token);
+    $exp = \floor(\log($token, 10));
+    return $x . \sprintf('%.2fE%+03d', $token / \pow(10, $exp), $exp);
 }
 
 function minify_css_color($token) {
@@ -532,8 +548,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     false !== \strpos($token, '@preserve')
                 ) {
                     $token = \ltrim(\substr($token, 2, -2), '!*');
-                    $token = \preg_replace('/@preserve\s*/', "", $token);
-                    return '/*' . \trim($token) . '*/';
+                    return '/*' . \trim(\strtr($token, ['@preserve' => ""])) . '*/';
                 }
             }
             return ""; // Remove!
@@ -787,8 +802,7 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
                     false !== \strpos($token, '@preserve')
                 ) {
                     $token = \substr($token, 4, -3);
-                    $token = \preg_replace('/@preserve\s*/', "", $token);
-                    return '<!--' . \trim($token) . '-->';
+                    return '<!--' . \trim(\strtr($token, ['@preserve' => ""])) . '-->';
                 }
             }
             return ""; // Remove!
@@ -873,17 +887,18 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
     }
     $out = every([
         token_js_comment,
+        token_js_comment_2,
         token_string,
-        token_js_pattern,
-        token_js_comment_2
+        token_js_string,
+        token_js_pattern
     ], static function($token) use($comment, $quote) {
-        if (1 === $comment) {
-            if (0 === \strpos($token, '//')) {
-                return '/*' . \trim(\substr($token, -2)) . '*/';
-            }
-            return $token;
-        }
         if (is_token_js_comment($token)) {
+            if (1 === $comment) {
+                if (0 === \strpos($token, '//')) {
+                    return '/*' . \trim(\substr($token, 2)) . '*/';
+                }
+                return $token;
+            }
             if (2 === $comment) {
                 if (
                     // Detect special comment(s) from the third character.
@@ -907,14 +922,20 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
     $out = every([
         token_js_comment,
         token_js_comment_2,
-        token_js_pattern,
         token_string,
+        token_js_string,
+        token_js_pattern,
         token_boolean,
         token_number,
         '\b(?:case|return|typeof|void)\s*(?=[-.\d])',
         '[%&()*+,\-/:;<=>?\[\]^{|}]'
-    ], static function($token, $chop) {
-        if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_string($token)) {
+    ], static function($token, $chop) use($comment, $quote) {
+        if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_js_string($token)) {
+            if ('`' === $token[0] && false !== \strpos($token, '${')) {
+                return \preg_replace_callback('/\$\{\s*((?:' . token_string . '|[^{}]|(?R))*)\s*\}/', static function($m) use($comment, $quote) {
+                    return '${' . minify_js($m[1], $comment, $quote) . '}';
+                }, $token);
+            }
             return $token;
         }
         $token = \preg_replace('/\s+/', ' ', $token);
@@ -922,7 +943,9 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
             return ['false' => '!1', 'true' => '!0'][$token] ?? $token;
         }
         if (is_token_number($token)) {
-            return minify_number($token);
+            $token = minify_number($token);
+            $e = minify_number_long($token);
+            return \strlen($e) < \strlen($token) ? \strtolower($e) : $token;
         }
         if (
             'case ' === $chop ||
@@ -938,12 +961,17 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
         token_js_comment,
         token_js_comment_2,
         token_js_pattern,
-        '(?:(?:' . token_js_name . ')|[\]])(?:\[(?:"' . token_js_name . '"|\'' . token_js_name . '\')\])+',
-        '(?<=[\s{,])(?:"' . token_js_name . '"|\'' . token_js_name . '\')\s*:',
-        token_string
+        '(?:(?:' . token_js_name . ')|[\]])(?:\[(?:"' . token_js_name . '"|\'' . token_js_name . '\'|`' . token_js_name . '`)\])+',
+        '(?<=[\s{,])(?:"' . token_js_name . '"|\'' . token_js_name . '\'|`' . token_js_name . '`)\s*:',
+        token_string,
+        token_js_string,
+        '\(\s*' . token_js_name . '\s*\)\s*=>'
     ], static function($token, $chop) use($quote) {
-        if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_string($token)) {
+        if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_js_string($token)) {
             return $token;
+        }
+        if ('=>' === \substr($token, -2)) {
+            return \trim(\substr(\trim(\substr($token, 1, -2)), 0, -1)) . '=>';
         }
         if (1 !== $quote) {
             if (('"' === $token[0] || "'" === $token[0]) && ':' === \substr($token, -1)) {
@@ -959,6 +987,7 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
             }
         }
         return \strtr($token, [
+            'window.' => "",
             ',]' => ']',
             ',}' => '}',
             ';}' => '}'
@@ -1032,15 +1061,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 $skip = false;
             } else {
                 if (\T_OPEN_TAG === $id) {
-                    if (
-                        false !== \strpos($token, ' ') ||
-                        false !== \strpos($token, "\n") ||
-                        false !== \strpos($token, "\t") ||
-                        false !== \strpos($token, "\r")
-                    ) {
-                        $token = \rtrim($token);
-                    }
-                    $out .= $token . ' ';
+                    $out .= \rtrim($token) . ' ';
                     $start = \T_OPEN_TAG;
                     $skip = true;
                 } else if (\T_OPEN_TAG_WITH_ECHO === $id) {
@@ -1122,8 +1143,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                         )
                     ) {
                         $token = \ltrim(\substr($token, 2, -2), '!*');
-                        $token = \preg_replace('/@preserve\s*/', "", $token);
-                        $out .= '/*' . \trim($token) . '*/';
+                        $out .= '/*' . \trim(\strtr($token, ['@preserve' => ""])) . '*/';
                     }
                     $skip = true;
                 } else {
