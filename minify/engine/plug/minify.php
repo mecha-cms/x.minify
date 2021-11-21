@@ -361,15 +361,17 @@ function minify_number($token) {
     return $token;
 }
 
-// <https://stackoverflow.com/a/21417604/1163000>
 function minify_number_long($token) {
-    if ('0' === $token) {
-        return $token;
-    }
-    $x = '-' === $token[0] ? '-' : "";
-    $token = (float) ($x ? \substr($token, 1) : $token);
-    $exp = \floor(\log($token, 10));
-    return $x . \sprintf('%.2fE%+03d', $token / \pow(10, $exp), $exp);
+    // TODO: Convert `1000` to `1e3`
+    // if ('0' === $token) {
+    //     return $token;
+    // }
+    // $x = '-' === $token[0] ? '-' : "";
+    // <https://stackoverflow.com/a/21417604/1163000>
+    // $token = (float) ($x ? \substr($token, 1) : $token);
+    // $exp = \floor(\log($token, 10));
+    // return $x . \sprintf('%.2fE%+03d', $token / \pow(10, $exp), $exp);
+    return $token;
 }
 
 function minify_css_color($token) {
@@ -633,7 +635,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     }, $chop);
                 }
                 if ('%' === \substr($token, -1)) {
-                    return minify_number(\substr($chop, 0, -1)) . '%';
+                    return $token;
                 }
                 return $chop;
             }, $selector);
@@ -987,7 +989,6 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
             }
         }
         return \strtr($token, [
-            'window.' => "",
             ',]' => ']',
             ',}' => '}',
             ';}' => '}'

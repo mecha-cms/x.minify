@@ -21,6 +21,12 @@ window.setTimeout(() => {
     window.alert(window.location.href);
 }, 100);
 
+window.foo = 1;
+
+console.log(window.foo + 1);
+
+window.foo += 1;
+
 return [ 1 , 2 , 3 ];
 
 return { foo : 1 , bar : 2 };
