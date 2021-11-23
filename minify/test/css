@@ -20,6 +20,18 @@
     to { margin: 100%; }
 }
 
+@keyframes foo1 {
+    to {
+        margin: 0;
+    }
+}
+
+@keyframes foo-1 {
+    to {
+        margin: 100%;
+    }
+}
+
 /* remove */
 
 /*! keep */
