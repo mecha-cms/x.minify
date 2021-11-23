@@ -3,7 +3,7 @@ title: Minify
 description: Remove white-spaces and unused comments in HTML, CSS and JavaScript files.
 author: Taufik Nurrohman
 type: Markdown
-version: 2.6.2
+version: 2.6.3
 
 use:
   '.\lot\x\layout': 0

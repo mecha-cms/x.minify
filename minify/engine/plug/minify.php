@@ -488,6 +488,7 @@ function minify_css_values($token, int $quote = 2) {
         token_css_function_url,
         token_css_function,
         token_string,
+        token_css_property,
         token_css_number,
         token_number,
         '[;,]'

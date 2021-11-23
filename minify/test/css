@@ -32,6 +32,12 @@
     }
 }
 
+test-frame-call {
+    animation: foo 1s ease-out;
+    animation: foo1 0.5s ease-out;
+    animation: foo-1 0.50s ease-out;
+}
+
 /* remove */
 
 /*! keep */
