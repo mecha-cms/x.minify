@@ -504,15 +504,13 @@ function minify_css_values($token, int $quote = 2) {
             return false !== \strpos($raw, "'") ? '"' . $raw . '"' : "'" . $raw . "'";
         }
         if (is_token_css_hex($token) || isset(tokens_css_color_name[$token])) {
-            return ' ' . minify_css_color($token) . ' ';
+            $token = minify_css_color($token);
+        } else if (is_token_css_function($token)) {
+            $token = minify_css_function($token, $quote);
+        } else if (is_token_css_unit($token)) {
+            $token = minify_css_unit($token);
         }
-        if (is_token_css_function($token)) {
-            return ' ' . minify_css_function($token, $quote) . ' ';
-        }
-        if (is_token_css_unit($token)) {
-            return ' ' . minify_css_unit($token) . ' ';
-        }
-        return $token;
+        return ' ' . $token . ' '; // Ensure white-space around token!
     }, $token);
     $token = 'x' . $token . 'x';
     $token = every([

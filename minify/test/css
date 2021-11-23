@@ -32,10 +32,16 @@
     }
 }
 
-test-frame-call {
-    animation: foo 1s ease-out;
-    animation: foo1 0.5s ease-out;
-    animation: foo-1 0.50s ease-out;
+test-ensure-space-around-token {
+    foo: bar 0
+         baz qux;
+    foo: bar-0
+         baz-1 qux-2;
+    foo: bar -1 ,
+         baz qux;
+    foo: bar -0 ,
+         baz-1 qux-2;
+    flex-flow: row wrap;
 }
 
 /* remove */
