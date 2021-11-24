@@ -6,6 +6,7 @@ Release Notes
 
 ### 2.6.5
 
+ - Fixed [#5](https://github.com/mecha-cms/x.minify/issues/5), [#6](https://github.com/mecha-cms/x.minify/issues/6).
  - Refactor.
 
 ### 2.5.7
