@@ -294,6 +294,8 @@ test-unit {
 
 misc {
     background: none;
+    background: url(data:image/svg+xml;base64,asdf+asdf/==);
+    background: white url(./file.jpg) no-repeat 0 0;
     background: white url('./file.jpg') no-repeat 0 0;
     border: none;
     outline: none;

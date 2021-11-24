@@ -28,7 +28,7 @@ $n = __NAMESPACE__;
 \define($n . "\\token_css_selector_id", '#' . token_css_name);
 \define($n . "\\token_css_selector_pseudo", '::?' . token_css_property);
 
-\define($n . "\\token_css_function_url", 'url\(\s*(?:' . token_string . '|[!#$%&*-\[\]-~]|' . token_css_name . ')\s*\)');
+\define($n . "\\token_css_function_url", 'url\(\s*(?:' . token_string . '|[^()]+)\s*\)');
 
 \define($n . "\\tokens_css_color_name", [
     'aliceblue' => '#f0f8ff',

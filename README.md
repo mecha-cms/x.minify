@@ -4,7 +4,7 @@ Minify Extension for [Mecha](https://github.com/mecha-cms/mecha)
 Release Notes
 -------------
 
-### 2.6.4
+### 2.6.5
 
  - Refactor.
 
