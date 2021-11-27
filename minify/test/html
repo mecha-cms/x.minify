@@ -114,3 +114,24 @@ id="foo"
 />
 
 <img alt="" src="./file.jpg" />
+
+<input disabled="" readonly="readonly" required="invalid boolean value" type="text">
+
+<details open="open">
+  <summary> text text </summary>
+  text text text
+</details>
+
+<div style="
+  border: 0 solid black;
+  color: magenta;
+  border-width: var(--stroke-width, 0);
+">
+  <p> text text text </p>
+</div>
+
+<div style="
+  border-color: red;
+">
+  <p> text text text </p>
+</div>

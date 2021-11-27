@@ -760,9 +760,8 @@ function minify_html_content($token, $tag, $fn, int $quote = 2) {
 
 function minify_html_element($token, int $quote = 2) {
     $m = get_html_name($token);
-    $m[0] = \trim($m[0]);
-    $m[1] = \trim($m[1]);
-    $m[1] = every([
+    $name = \trim($m[0]);
+    $value = every([
         token_string,
         '\s' . token_html_name
     ], static function($token, $chop) use($quote) {
@@ -778,8 +777,42 @@ function minify_html_element($token, int $quote = 2) {
             ' ?' => '?',
             ' /' => '/'
         ]);
-    }, $m[1]);
-    return '<' . $m[0] . ("" !== $m[1] ? ' ' . $m[1] : "") . '>';
+    }, ' ' . $m[1]);
+    // A number of attribute(s) are boolean attribute(s). The presence of a boolean attribute on an element
+    // represents the `true` value, and the absence of the attribute represents the `false` value.
+    // If the attribute is present, its value must either be the empty string or a value that is an ASCII
+    // case-insensitive match for the attribute’s canonical name, with no leading or trailing white-space.
+    // The values “true” and “false” are not allowed on boolean attribute(s). To represent a `false` value,
+    // the attribute has to be omitted altogether.
+    //
+    // <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes>
+    $any = 'allow(?:fullscreen|paymentrequest)|async|auto(?:focus|play)|checked|controls|def(?:ault|er)|disabled|formnovalidate|hidden|ismap|itemscope|loop|multiple|muted|no(?:module|validate)|open|playsinline|re(?:adonly|quired|versed)|selected|truespeed';
+    $value = \preg_replace('/(^|\s)(' . $any . ')=(?:""|"\2"|\'\2\'|\'\'|\2)/i', '$1$2', $value);
+    // Minify inline CSS
+    if (false !== \strpos($value, ' style=') || 0 === \strpos($value, 'style=')) {
+        $value = \preg_replace_callback('/(^|\s)(style)=(' . token_string . '|\S+)/i', static function($m) use($quote) {
+            $m[3] = \substr(minify_css('x{' . \substr($m[3], 1, -1) . '}'), 2, -1);
+            if (2 === $quote) {
+                if (
+                    false !== \strpos($m[3], "'") ||
+                    false !== \strpos($m[3], ' ') ||
+                    false !== \strpos($m[3], '"') ||
+                    false !== \strpos($m[3], '&') ||
+                    false !== \strpos($m[3], '/') ||
+                    false !== \strpos($m[3], '<') ||
+                    false !== \strpos($m[3], '=') ||
+                    false !== \strpos($m[3], '>')
+                ) {
+                    $m[3] = '"' . $m[3] . '"';
+                }
+            } else {
+                $m[3] = '"' . $m[3] . '"';
+            }
+            return $m[1] . $m[2] . '=' . $m[3];
+        }, $value);
+    }
+    $value = \trim($value);
+    return '<' . $name . ("" !== $value ? ' ' . $value : "") . '>';
 }
 
 function minify_html(string $in, int $comment = 2, int $quote = 1) {

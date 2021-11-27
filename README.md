@@ -4,9 +4,10 @@ Minify Extension for [Mecha](https://github.com/mecha-cms/mecha)
 Release Notes
 -------------
 
-### 2.6.5
+### 2.6.6
 
  - Fixed [#5](https://github.com/mecha-cms/x.minify/issues/5), [#6](https://github.com/mecha-cms/x.minify/issues/6).
+ - Minified boolean HTML attributes, and inline CSS rules.
  - Refactor.
 
 ### 2.5.7
