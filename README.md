@@ -4,6 +4,10 @@ Minify Extension for [Mecha](https://github.com/mecha-cms/mecha)
 Release Notes
 -------------
 
+### 3.0.0
+
+ - [x] Updated for Mecha 3.0.0.
+
 ### 2.6.6
 
  - Fixed [#5](https://github.com/mecha-cms/x.minify/issues/5), [#6](https://github.com/mecha-cms/x.minify/issues/6).

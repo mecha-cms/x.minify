@@ -1,36 +1,36 @@
 <?php namespace x\minify\_;
 
-$n = __NAMESPACE__;
+\define(__NAMESPACE__ . "\\n", __NAMESPACE__);
 
-\define($n . "\\token_boolean", '\b(?:true|false)\b');
-\define($n . "\\token_number", '-?(?:(?:\d+)?\.)?\d+');
-\define($n . "\\token_string", '(?:"(?:[^"\\\]|\\\.)*"|\'(?:[^\'\\\]|\\\.)*\')');
+\define(n . "\\token_boolean", '\b(?:true|false)\b');
+\define(n . "\\token_number", '-?(?:(?:\d+)?\.)?\d+');
+\define(n . "\\token_string", '(?:"(?:[^"\\\]|\\\.)*"|\'(?:[^\'\\\]|\\\.)*\')');
 
-\define($n . "\\token_css_spec", '(?:[^\0-\237]|\\[a-f\d]{1,6}(?:\n\r|[ \f\n\r\t])?|\\[^a-f\d\f\n\r])');
+\define(n . "\\token_css_spec", '(?:[^\0-\237]|\\[a-f\d]{1,6}(?:\n\r|[ \f\n\r\t])?|\\[^a-f\d\f\n\r])');
 
-\define($n . "\\token_css_combinator", '[~+>]');
-\define($n . "\\token_css_comment", '/\*[^*]*\*+(?:[^/*][^*]*\*+)*/');
-\define($n . "\\token_css_hack", '[!#$%&()*+,./:<=>?@\[\]_`|~]');
-\define($n . "\\token_css_hex", '#(?:[a-f\d]{1,2}){3,4}');
-\define($n . "\\token_css_property", '[a-z-][a-z\d-]*');
-\define($n . "\\token_css_value", '(?:' . token_string . '|[^;])*');
+\define(n . "\\token_css_combinator", '[~+>]');
+\define(n . "\\token_css_comment", '/\*[^*]*\*+(?:[^/*][^*]*\*+)*/');
+\define(n . "\\token_css_hack", '[!#$%&()*+,./:<=>?@\[\]_`|~]');
+\define(n . "\\token_css_hex", '#(?:[a-f\d]{1,2}){3,4}');
+\define(n . "\\token_css_property", '[a-z-][a-z\d-]*');
+\define(n . "\\token_css_value", '(?:' . token_string . '|[^;])*');
 
 // <https://drafts.csswg.org/css2#tokenization>
-\define($n . "\\token_css_name", '(?:_[a-z]|' . token_css_spec . ')(?:[_a-z\d-]|' . token_css_spec . ')*');
-\define($n . "\\token_css_function", token_css_property . '\(\s*(?:' . token_string . '|[^};])*\s*\)');
+\define(n . "\\token_css_name", '(?:_[a-z]|' . token_css_spec . ')(?:[_a-z\d-]|' . token_css_spec . ')*');
+\define(n . "\\token_css_function", token_css_property . '\(\s*(?:' . token_string . '|[^};])*\s*\)');
 
-\define($n . "\\token_css_selector_any", '[&*]');
-\define($n . "\\token_css_selector_at", '@' . token_css_name);
-\define($n . "\\token_css_selector_attr", '\[(?:' . token_string . '|[^]])*\]');
-\define($n . "\\token_css_selector_class", '\.' . token_css_name);
-\define($n . "\\token_css_selector_element", token_css_name);
-\define($n . "\\token_css_selector_function", '::?' . token_css_function);
-\define($n . "\\token_css_selector_id", '#' . token_css_name);
-\define($n . "\\token_css_selector_pseudo", '::?' . token_css_property);
+\define(n . "\\token_css_selector_any", '[&*]');
+\define(n . "\\token_css_selector_at", '@' . token_css_name);
+\define(n . "\\token_css_selector_attr", '\[(?:' . token_string . '|[^]])*\]');
+\define(n . "\\token_css_selector_class", '\.' . token_css_name);
+\define(n . "\\token_css_selector_element", token_css_name);
+\define(n . "\\token_css_selector_function", '::?' . token_css_function);
+\define(n . "\\token_css_selector_id", '#' . token_css_name);
+\define(n . "\\token_css_selector_pseudo", '::?' . token_css_property);
 
-\define($n . "\\token_css_function_url", 'url\(\s*(?:' . token_string . '|[^()]+)\s*\)');
+\define(n . "\\token_css_function_url", 'url\(\s*(?:' . token_string . '|[^()]+)\s*\)');
 
-\define($n . "\\tokens_css_color_name", [
+\define(n . "\\tokens_css_color_name", [
     'aliceblue' => '#f0f8ff',
     'antiquewhite' => '#faebd7',
     'aqua' => '#0ff',
@@ -181,13 +181,13 @@ $n = __NAMESPACE__;
     'yellowgreen' => '#9acd32'
 ]);
 
-\define($n . "\\tokens_css_color_hex", \array_flip(tokens_css_color_name));
+\define(n . "\\tokens_css_color_hex", \array_flip(tokens_css_color_name));
 
 // <https://drafts.csswg.org/css2#block>
-\define($n . "\\token_css_block", '\{(?:' . token_string . '|[^{}]|(?R))*\}');
+\define(n . "\\token_css_block", '\{(?:' . token_string . '|[^{}]|(?R))*\}');
 
 // <https://drafts.csswg.org/css2#rule-sets>
-\define($n . "\\token_css_rules", '(?:\s*(?:' . \implode('|', [
+\define(n . "\\token_css_rules", '(?:\s*(?:' . \implode('|', [
     token_css_comment,
     token_css_selector_function,
     token_css_selector_pseudo,
@@ -202,19 +202,19 @@ $n = __NAMESPACE__;
 ]) . ')\s*)+\s*' . token_css_block);
 
 // <https://www.w3.org/TR/css-values-4>
-\define($n . "\\token_css_unit", '%|Hz|Q|cap|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|ic|in|kHz|lh|mm|ms|pc|pt|px|rad|rcap|rch|rem|rex|ric|rlh|s|turn|vb|vh|vi|vmax|vmin|vw');
-\define($n . "\\token_css_number", token_number . '(?:' . token_css_unit . ')');
+\define(n . "\\token_css_unit", '%|Hz|Q|cap|ch|cm|deg|dpcm|dpi|dppx|em|ex|grad|ic|in|kHz|lh|mm|ms|pc|pt|px|rad|rcap|rch|rem|rex|ric|rlh|s|turn|vb|vh|vi|vmax|vmin|vw');
+\define(n . "\\token_css_number", token_number . '(?:' . token_css_unit . ')');
 
-\define($n . "\\token_html_name", '[a-z\d][a-z\d:-]*');
+\define(n . "\\token_html_name", '[a-z\d][a-z\d:-]*');
 
-\define($n . "\\token_html_comment", '<!--[\s\S]*?-->');
-\define($n . "\\token_html_dtd", '<!' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>');
-\define($n . "\\token_html_element_end", '</' . token_html_name . '>');
-\define($n . "\\token_html_element_start", '<' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>');
-\define($n . "\\token_html_pi", '<\?' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?\?>');
+\define(n . "\\token_html_comment", '<!--[\s\S]*?-->');
+\define(n . "\\token_html_dtd", '<!' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>');
+\define(n . "\\token_html_element_end", '</' . token_html_name . '>');
+\define(n . "\\token_html_element_start", '<' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>');
+\define(n . "\\token_html_pi", '<\?' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?\?>');
 
 // Don’t touch HTML content of `<pre>`, `<code>`, `<script>`, `<style>`, `<textarea>` element
-\define($n . "\\token_html_element_skip", (static function($tags) {
+\define(n . "\\token_html_element_skip", (static function($tags) {
     foreach ($tags as &$tag) {
         $tag = '<' . $tag . '(?:\s(?:' . token_string . '|[^>])*)?>[\s\S]*?</' . $tag . '>';
     }
@@ -222,13 +222,13 @@ $n = __NAMESPACE__;
     return '(?:' . \implode('|', $tags) . ')';
 })(['pre', 'code', 'script', 'style', 'textarea']));
 
-\define($n . "\\token_html_entity", '&(?:[a-z\d]+|#\d+|#x[a-f\d]+);');
+\define(n . "\\token_html_entity", '&(?:[a-z\d]+|#\d+|#x[a-f\d]+);');
 
-\define($n . "\\token_js_comment", token_css_comment);
-\define($n . "\\token_js_comment_2", '//[^\n]*');
-\define($n . "\\token_js_name", '[a-z$_][a-z$_\d]*');
-\define($n . "\\token_js_pattern", '/(?:(?![*+?])(?:[^\n\[/\\\]|\\\.|\[(?:[^\n\]\\\]|\\\.)*\])+)/[gimuy]*');
-\define($n . "\\token_js_string", '`(?:[^`\\\]|\\\.)*`');
+\define(n . "\\token_js_comment", token_css_comment);
+\define(n . "\\token_js_comment_2", '//[^\n]*');
+\define(n . "\\token_js_name", '[a-z$_][a-z$_\d]*');
+\define(n . "\\token_js_pattern", '/(?:(?![*+?])(?:[^\n\[/\\\]|\\\.|\[(?:[^\n\]\\\]|\\\.)*\])+)/[gimuy]*');
+\define(n . "\\token_js_string", '`(?:[^`\\\]|\\\.)*`');
 
 function every(array $tokens, callable $fn = null, string $in = null, string $flag = 'i') {
     if ("" === ($in = \trim($in))) {
@@ -1217,8 +1217,8 @@ $state = \State::get('x.minify', true);
 \array_unshift($state['.json'], "");
 \array_unshift($state['.php'], "");
 
-\Minify::_('.css', [$n . "\\minify_css", $state['.css']]);
-\Minify::_('.html', [$n . "\\minify_html", $state['.html']]);
-\Minify::_('.js', [$n . "\\minify_js", $state['.js']]);
-\Minify::_('.json', [$n . "\\minify_json", $state['.json']]);
-\Minify::_('.php', [$n . "\\minify_php", $state['.php']]);
+\Minify::_('.css', [n . "\\minify_css", $state['.css']]);
+\Minify::_('.html', [n . "\\minify_html", $state['.html']]);
+\Minify::_('.js', [n . "\\minify_js", $state['.js']]);
+\Minify::_('.json', [n . "\\minify_json", $state['.json']]);
+\Minify::_('.php', [n . "\\minify_php", $state['.php']]);

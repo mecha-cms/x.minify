@@ -1,7 +1,9 @@
 <?php namespace x;
 
-if (\defined("\\DEBUG") && 'x.minify' === \DEBUG) {
-    require __DIR__ . \DS . 'test.php';
+require __DIR__ . \D . 'engine' . \D . 'use.php';
+
+if (\defined("\\TEST") && 'x.minify' === \TEST) {
+    require __DIR__ . \D . 'test.php';
 }
 
 function minify($content) {
