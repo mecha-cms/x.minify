@@ -778,12 +778,11 @@ function minify_html_element($token, int $quote = 2) {
             ' /' => '/'
         ]);
     }, ' ' . $m[1]);
-    // A number of attribute(s) are boolean attribute(s). The presence of a boolean attribute on an element
-    // represents the `true` value, and the absence of the attribute represents the `false` value.
-    // If the attribute is present, its value must either be the empty string or a value that is an ASCII
-    // case-insensitive match for the attribute’s canonical name, with no leading or trailing white-space.
-    // The values “true” and “false” are not allowed on boolean attribute(s). To represent a `false` value,
-    // the attribute has to be omitted altogether.
+    // A number of attribute(s) are boolean attribute(s). The presence of a boolean attribute on an element represents
+    // the `true` value, and the absence of the attribute represents the `false` value. If the attribute is present, its
+    // value must either be the empty string or a value that is an ASCII case-insensitive match for the attribute’s
+    // canonical name, with no leading or trailing white-space. The values “true” and “false” are not allowed on boolean
+    // attribute(s). To represent a `false` value, the attribute has to be omitted altogether.
     //
     // <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes>
     $any = 'allow(?:fullscreen|paymentrequest)|async|auto(?:focus|play)|checked|controls|def(?:ault|er)|disabled|formnovalidate|hidden|ismap|itemscope|loop|multiple|muted|no(?:module|validate)|open|playsinline|re(?:adonly|quired|versed)|selected|truespeed';
@@ -1139,15 +1138,16 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                             if (';' === $v || ',' === $v) {
                                 if ("\nS\n" . $v === \substr($out, -4)) {
                                     $out = \rtrim($out, "\n" . $v) . $v;
+                                    // Prior to PHP 7.3.0, it is very important to note that the line with the closing
+                                    // identifier must contain no other characters, except a semicolon (`;`). That means
+                                    // especially that the identifier may not be indented, and there may not be any
+                                    // spaces or tabs before or after the semicolon. It's also important to realize that
+                                    // the first character before the closing identifier must be a newline as defined by
+                                    // the local operating system. This is `\n` on UNIX systems, including macOS. The
+                                    // closing delimiter must also be followed by a newline.
+                                    //
+                                    // <https://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc>
                                     if (';' === $v) {
-                                        // Prior to PHP 7.3.0, it is very important to note that the line with the closing identifier must
-                                        // contain no other characters, except a semicolon (`;`). That means especially that the identifier
-                                        // may not be indented, and there may not be any spaces or tabs before or after the semicolon.
-                                        // It's also important to realize that the first character before the closing identifier must be a
-                                        // newline as defined by the local operating system. This is `\n` on UNIX systems, including macOS.
-                                        // The closing delimiter must also be followed by a newline.
-                                        //
-                                        // <https://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc>
                                         $out .= "\n";
                                     }
                                 }
