@@ -235,7 +235,7 @@ function every(array $tokens, callable $fn = null, string $in = null, string $fl
         return "";
     }
     $pattern = \strtr('(?:' . \implode(')|(?:', $tokens) . ')', ['/' => "\\/"]);
-    $chops = \preg_split('/(' . $pattern . ')/' . $flag, $in, null, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
+    $chops = \preg_split('/(' . $pattern . ')/' . $flag, $in, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
     if (!$fn) {
         return $chops;
     }
@@ -252,7 +252,7 @@ function every(array $tokens, callable $fn = null, string $in = null, string $fl
 
 function get_css_rules($token) {
     $block = $selector = "";
-    $m = \preg_split('/(' . token_string . '|[{])/', $token, null, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
+    $m = \preg_split('/(' . token_string . '|[{])/', $token, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
     while ($m) {
         if ('{' === ($v = \array_shift($m))) {
             break;
