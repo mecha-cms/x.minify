@@ -1,0 +1,5 @@
+{
+  "description": "Remove white-spaces and unused comments in HTML, CSS and JavaScript files.",
+  "license": "GPL-3.0-or-later",
+  "name": "mecha-cms/x.minify"
+}
