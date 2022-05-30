@@ -1,5 +1,8 @@
 {
   "description": "Remove white-spaces and unused comments in HTML, CSS and JavaScript files.",
   "license": "GPL-3.0-or-later",
-  "name": "mecha-cms/x.minify"
+  "name": "mecha-cms/x.minify",
+  "suggest": {
+    "mecha-cms/x.layout": "Install this extension to automatically minify the HTML output."
+  }
 }
