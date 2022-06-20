@@ -1120,18 +1120,18 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     $skip = true;
                 } else if (\T_WHITESPACE === $id) {
                     $n = $toks[$i + 1] ?? null;
-                    if(!$skip && (!\is_string($n) || '$' === $n) && !isset($t[$n[0]])) {
+                    if (!$skip && (!\is_string($n) || '$' === $n) && !isset($t[$n[0]])) {
                         $out .= ' ';
                     }
                     $skip = false;
                 } else if (\T_START_HEREDOC === $id) {
-                    $out .= "<<<S\n";
+                    $out .= "<<<" . ("'" === $token[3] ? "'S'" : 'S') . "\n";
                     $skip = false;
-                    $doc = true; // Enter HEREDOC
+                    $doc = true; // Enter (HERE/NOW)DOC
                 } else if (\T_END_HEREDOC === $id) {
                     $out .= "S\n";
                     $skip = true;
-                    $doc = false; // Exit HEREDOC
+                    $doc = false; // Exit (HERE/NOW)DOC
                     for ($j = $i + 1; $j < $c; ++$j) {
                         if (\is_string($v = $toks[$j])) {
                             $out .= $v;
