@@ -871,7 +871,7 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
         if ('</textarea>' === \substr($token, -11)) {
             return \preg_replace_callback('/' . token_html_element_start . '/', static function($m) use($quote) {
                 return minify_html_element($m[0], $quote);
-            }, $token);
+            }, $chop);
         }
         if ('</script>' === \substr($token, -9)) {
             return minify_html_content($token, 'script', static function($v) use($comment, $quote, $token) {
