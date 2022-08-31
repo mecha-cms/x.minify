@@ -864,12 +864,12 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
             }, $chop);
         }
         if ('</pre>' === \substr($token, -6)) {
-            return \preg_replace_callback('/' . token_html_element_start . '/', static function($m) use($quote) {
+            return \preg_replace_callback('/' . token_html_element_enter . '/', static function($m) use($quote) {
                 return minify_html_element($m[0], $quote);
             }, $token);
         }
         if ('</textarea>' === \substr($token, -11)) {
-            return \preg_replace_callback('/' . token_html_element_start . '/', static function($m) use($quote) {
+            return \preg_replace_callback('/' . token_html_element_enter . '/', static function($m) use($quote) {
                 return minify_html_element($m[0], $quote);
             }, $chop);
         }
