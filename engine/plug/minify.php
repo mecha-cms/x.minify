@@ -1,4 +1,4 @@
-<?php namespace x\minify\_;
+<?php namespace x\minify\f;
 
 \define(__NAMESPACE__ . "\\n", __NAMESPACE__);
 
@@ -209,8 +209,8 @@
 
 \define(n . "\\token_html_comment", '<!--[\s\S]*?-->');
 \define(n . "\\token_html_dtd", '<!' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>');
-\define(n . "\\token_html_element_end", '</' . token_html_name . '>');
-\define(n . "\\token_html_element_start", '<' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>');
+\define(n . "\\token_html_element_enter", '<' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>'); // Both `<foo bar="baz">` and `<foo bar="baz"/>`
+\define(n . "\\token_html_element_exit", '</' . token_html_name . '>');
 \define(n . "\\token_html_pi", '<\?' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?\?>');
 
 // Don’t touch HTML content of `<pre>`, `<code>`, `<script>`, `<style>`, `<textarea>` element
@@ -847,8 +847,8 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
         '\s*' . token_html_dtd . '\s*',
         '\s*' . token_html_pi . '\s*',
         '\s*' . token_html_element_skip . '\s*',
-        '\s*' . token_html_element_end . '\s*',
-        '\s*' . token_html_element_start . '\s*',
+        '\s*' . token_html_element_exit . '\s*',
+        '\s*' . token_html_element_enter . '\s*',
         '\s*' . token_html_entity . '\s*'
     ], static function($token, $chop) use($comment, $quote) {
         if (is_token_html_comment($token)) {
