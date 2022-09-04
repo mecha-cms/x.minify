@@ -675,56 +675,56 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     }
                     return minify_css_values($token . $end, $quote);
                 }
-                if (
-                    'margin' === $property ||
-                    'padding' === $property
-                ) {
-                    $unit = '(' . token_css_number . '|' . token_number . ')';
-                    // `1px 0 1px 0`
-                    if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $token, $m)) {
-                        $m[1] = minify_css_unit($m[1]);
-                        $m[2] = minify_css_unit($m[2]);
-                        $m[3] = minify_css_unit($m[3]);
-                        $m[4] = minify_css_unit($m[4]);
-                        if ($m[1] === $m[3] && $m[2] === $m[4] && $m[1] !== $m[2] && $m[3] !== $m[4]) {
-                            // `1px 0`
-                            return $m[1] . ' ' . $m[2] . $end;
-                        }
-                        if ($m[1] === $m[2] && $m[2] === $m[3] && $m[3] === $m[4]) {
-                            // `1px`
-                            return $m[1] . $end;
-                        }
-                    }
-                    // `1px 0 1px`
-                    if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $token, $m)) {
-                        $m[1] = minify_css_unit($m[1]);
-                        $m[2] = minify_css_unit($m[2]);
-                        $m[3] = minify_css_unit($m[3]);
-                        if ($m[1] === $m[3] && $m[1] !== $m[2]) {
-                            // `1px 0`
-                            return $m[1] . ' ' . $m[2] . $end;
-                        }
-                        if ($m[1] === $m[2] && $m[2] === $m[3]) {
-                            // `1px`
-                            return $m[1] . $end;
-                        }
-                    }
-                    // `1px 0`
-                    if (\preg_match('/^' . $unit . ' ' . $unit . '$/i', $token, $m)) {
-                        $m[1] = minify_css_unit($m[1]);
-                        $m[2] = minify_css_unit($m[2]);
-                        if ($m[1] === $m[2]) {
-                            // `1px`
-                            return $m[1] . $end;
-                        }
-                    }
-                    // `1px`
-                    if (\preg_match('/^' . $unit . '$/i', $token, $m)) {
-                        $m[1] = minify_css_unit($m[1]);
-                        return $m[1] . $end;
-                    }
-                    return minify_css_values($token . $end, $quote);
-                }
+                // if (
+                //     'margin' === $property ||
+                //     'padding' === $property
+                // ) {
+                //     $unit = '(' . token_css_number . '|' . token_number . ')';
+                //     // `1px 0 1px 0`
+                //     if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $token, $m)) {
+                //         $m[1] = minify_css_unit($m[1]);
+                //         $m[2] = minify_css_unit($m[2]);
+                //         $m[3] = minify_css_unit($m[3]);
+                //         $m[4] = minify_css_unit($m[4]);
+                //         if ($m[1] === $m[3] && $m[2] === $m[4] && $m[1] !== $m[2] && $m[3] !== $m[4]) {
+                //             // `1px 0`
+                //             return $m[1] . ' ' . $m[2] . $end;
+                //         }
+                //         if ($m[1] === $m[2] && $m[2] === $m[3] && $m[3] === $m[4]) {
+                //             // `1px`
+                //             return $m[1] . $end;
+                //         }
+                //     }
+                //     // `1px 0 1px`
+                //     if (\preg_match('/^' . $unit . ' ' . $unit . ' ' . $unit . '$/i', $token, $m)) {
+                //         $m[1] = minify_css_unit($m[1]);
+                //         $m[2] = minify_css_unit($m[2]);
+                //         $m[3] = minify_css_unit($m[3]);
+                //         if ($m[1] === $m[3] && $m[1] !== $m[2]) {
+                //             // `1px 0`
+                //             return $m[1] . ' ' . $m[2] . $end;
+                //         }
+                //         if ($m[1] === $m[2] && $m[2] === $m[3]) {
+                //             // `1px`
+                //             return $m[1] . $end;
+                //         }
+                //     }
+                //     // `1px 0`
+                //     if (\preg_match('/^' . $unit . ' ' . $unit . '$/i', $token, $m)) {
+                //         $m[1] = minify_css_unit($m[1]);
+                //         $m[2] = minify_css_unit($m[2]);
+                //         if ($m[1] === $m[2]) {
+                //             // `1px`
+                //             return $m[1] . $end;
+                //         }
+                //     }
+                //     // `1px`
+                //     if (\preg_match('/^' . $unit . '$/i', $token, $m)) {
+                //         $m[1] = minify_css_unit($m[1]);
+                //         return $m[1] . $end;
+                //     }
+                //     return minify_css_values($token . $end, $quote);
+                // }
                 if ('font-weight' === $property) {
                     return (['bold' => '700', 'normal' => '400'][$token] ?? $token) . $end;
                 }
