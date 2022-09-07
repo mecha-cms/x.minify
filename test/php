@@ -45,3 +45,63 @@ echo date('Y-m-d H:i:s', time( true ) );
 </div>
 
 <!-- <?php echo date('Y-m-d H:i:s', time( true ) ); ?> -->
+
+<?php
+
+namespace x\minify;
+
+use Test\Test\{
+    Test,
+    Test\Test,
+    Test\Test as Test
+};
+
+function css(?string $in) {
+    return \trim($in);
+}
+
+$var0 = [ 1 , 2 , 3 ] ; // comment
+$var1 = [ 1 , 2 , 3 ];
+
+$var0 = [ 1 , 2 , 3 ] ; # comment
+$var1 = [ 1 , 2 , 3 ];
+
+$var0 = [ 1 , 2 , 3 ] ; /* comment */
+$var1 = [ 1 , 2 , 3 ];
+
+#[Test(1, 2, 3)]
+class Test {
+    #[Test(1, 2, 3)]
+    public $test;
+    #[Test(1, 2, 3)]
+    #[Test(1, 2, 3)]
+    public function __construct(int $test) {
+        $this->test = $test;
+    }
+}
+
+// Remove trailing `,` in array
+$foo = [
+    1,
+    2,
+    3,
+];
+
+// Remove trailing `,` in function call
+echo bar(
+    1,
+    2,
+    3,
+);
+
+// Remove trailing `,` in namespace group
+use foo\bar\{
+    test\foo,
+    test\bar,
+    test\baz,
+};
+
+// Test named argument(s)
+baz(qux: 5);
+
+?>

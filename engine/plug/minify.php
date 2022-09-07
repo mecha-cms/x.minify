@@ -214,7 +214,7 @@
 \define(n . "\\token_html_pi", '<\?' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?\?>');
 
 // Don’t touch HTML content of `<pre>`, `<code>`, `<script>`, `<style>`, `<textarea>` element
-\define(n . "\\token_html_element_skip", (static function($tags) {
+\define(n . "\\token_html_element_skip", (static function ($tags) {
     foreach ($tags as &$tag) {
         $tag = '<' . $tag . '(?:\s(?:' . token_string . '|[^>])*)?>[\s\S]*?</' . $tag . '>';
     }
@@ -264,8 +264,8 @@ function get_css_rules($token) {
     return [$selector, $block];
 }
 
-function get_css_function($token) {
-    if (is_token_css_function($token)) {
+function get_css_function ($token) {
+    if (is_token_css_function ($token)) {
         return \explode('(', \substr($token, 0, -1), 2);
     }
     return [];
@@ -302,7 +302,7 @@ function is_token_css_comment($token) {
     return '/*' === \substr($token, 0, 2) && '*/' === \substr($token, -2);
 }
 
-function is_token_css_function($token) {
+function is_token_css_function ($token) {
     return ')' === \substr($token, -1) && \strpos($token, '(') > 0;
 }
 
@@ -395,7 +395,7 @@ function minify_css_color($token) {
         return $v !== $token && \strlen($v) < \strlen($token) ? $v : $token;
     }
     $token = \preg_replace('/\s*([(),\/])\s*/', '$1', $token);
-    if (is_token_css_function($token)) {
+    if (is_token_css_function ($token)) {
         if (0 === \strpos($token, 'rgba(')) {
             // Remove solid alpha channel from RGB color
             if (',1)' === \substr($token, -3) || '/1)' === \substr($token, -3)) {
@@ -414,14 +414,14 @@ function minify_css_color($token) {
                 return \strlen($hex) < \strlen($token) ? $hex : $token;
             }
         }
-        // Assume that any number in other color function(s) can be minified anyway
+        // Assume that any number in other color function (s) can be minified anyway
     }
     $v = tokens_css_color_name[$token] ?? $token;
     return $v !== $token && \strlen($v) < \strlen($token) ? $v : $token;
 }
 
-function minify_css_function($token, int $quote = 2) {
-    if (!$m = get_css_function($token)) {
+function minify_css_function ($token, int $quote = 2) {
+    if (!$m = get_css_function ($token)) {
         return $token;
     }
     $name = $m[0];
@@ -436,7 +436,7 @@ function minify_css_function($token, int $quote = 2) {
         // this `calc()` thing works in handling the unit(s). As far as I know, the only
         // valid unit-less number is when they are used as the divisor/multiplicator.
         // We can remove the space between `(` and `)` safely.
-        $params = \trim(\preg_replace_callback('/' . token_number . '/', static function($m) {
+        $params = \trim(\preg_replace_callback('/' . token_number . '/', static function ($m) {
             return minify_number($m[0]);
         }, $params));
         return 'calc(' . \strtr($params, [
@@ -492,7 +492,7 @@ function minify_css_values($token, int $quote = 2) {
         token_css_number,
         token_number,
         '[;,]'
-    ], static function($token) use($quote) {
+    ], static function ($token) use ($quote) {
         if (is_token_css_comment($token)) {
             return $token;
         }
@@ -505,8 +505,8 @@ function minify_css_values($token, int $quote = 2) {
         }
         if (is_token_css_hex($token) || isset(tokens_css_color_name[$token])) {
             $token = minify_css_color($token);
-        } else if (is_token_css_function($token)) {
-            $token = minify_css_function($token, $quote);
+        } else if (is_token_css_function ($token)) {
+            $token = minify_css_function ($token, $quote);
         } else if (is_token_css_unit($token)) {
             $token = minify_css_unit($token);
         }
@@ -519,8 +519,8 @@ function minify_css_values($token, int $quote = 2) {
         '\s*' . token_css_function . '\s*',
         '\s*' . token_string . '\s*',
         '[;,/]'
-    ], function($token, $chop) {
-        if (is_token_css_comment($token) || is_token_string($token) || is_token_css_function($token)) {
+    ], function ($token, $chop) {
+        if (is_token_css_comment($token) || is_token_string($token) || is_token_css_function ($token)) {
             return $chop;
         }
         return $token;
@@ -532,7 +532,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
     if ("" === ($in = \trim($in))) {
         return "";
     }
-    $out = every([token_css_comment], static function($token) use($comment) {
+    $out = every([token_css_comment], static function ($token) use ($comment) {
         if (1 === $comment) {
             return $token;
         }
@@ -562,7 +562,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
         '@charset\s+' . token_string . '\s*;',
         '@import\s+' . token_string . '[^;]*;',
         '@import\s+' . token_css_function_url . '[^;]*;',
-    ], static function($token) use($comment, $quote) {
+    ], static function ($token) use ($comment, $quote) {
         if (is_token_css_comment($token)) {
             return $token; // Keep!
         }
@@ -583,9 +583,9 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             if ('@font-face' === $selector) {
                 return $selector . \substr(minify_css('x{' . $block . '}', $comment, $quote), 1);
             }
-            $selector = \preg_replace_callback('/((?:[a-z][a-z\d-]*)?)\(\s*((?:' . token_string . '|[^()]|(?R))*)\s*\)/', static function($m) use($comment, $quote) {
+            $selector = \preg_replace_callback('/((?:[a-z][a-z\d-]*)?)\(\s*((?:' . token_string . '|[^()]|(?R))*)\s*\)/', static function ($m) use ($comment, $quote) {
                 if ("" !== $m[1]) {
-                    return minify_css_function($m[0], $quote);
+                    return minify_css_function ($m[0], $quote);
                 }
                 return '(' . \substr(minify_css('x{' . $m[2] . '}', $comment, $quote), 2, -1) . ')';
             }, $selector);
@@ -605,10 +605,10 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                 // '\s*' . token_css_selector_element . '\s*',
                 token_css_combinator,
                 '[,]'
-            ], static function($token, $chop) use($comment, $quote) {
+            ], static function ($token, $chop) use ($comment, $quote) {
                 if (':' === $token[0]) {
                     if (')' === \substr($token, -1)) {
-                        return \preg_replace_callback('/\(\s*((?:' . token_string . '|[^()]|(?R))*)\s*\)/', static function($m) use($comment, $quote) {
+                        return \preg_replace_callback('/\(\s*((?:' . token_string . '|[^()]|(?R))*)\s*\)/', static function ($m) use ($comment, $quote) {
                             // Assume that argument(s) of `:foo()` is a complete CSS selector so we can minify it recursively.
                             // FYI, that `{x:x}` part is a dummy just to make sure that the minifier will not remove the whole rule(s)
                             // since `x{x:x}` is not considered as a selector with empty rule(s).
@@ -618,7 +618,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                     return $chop;
                 }
                 if ('[' === $token[0] && ']' === \substr($token, -1)) {
-                    return \preg_replace_callback('/=(' . token_string . ')(?:\s*([is]))?(?=\])/i', static function($m) use($quote) {
+                    return \preg_replace_callback('/=(' . token_string . ')(?:\s*([is]))?(?=\])/i', static function ($m) use ($quote) {
                         $token = \substr($m[1], 1, -1);
                         if ("" === $token) {
                             return '=""';
@@ -642,7 +642,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                 token_string,
                 token_css_combinator,
                 '[,]'
-            ], static function($token) {
+            ], static function ($token) {
                 return $token;
             }, $selector);
             $property = null; // Store current property
@@ -653,7 +653,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                 // Match property
                 token_css_hack . '?' . token_css_property . '\s*:\s*'
                 // … other must be the value
-            ], static function($token) use(&$property, $quote) {
+            ], static function ($token) use (&$property, $quote) {
                 if (is_token_css_comment($token)) {
                     return $token;
                 }
@@ -739,7 +739,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
                 return minify_css_values($token, $quote);
             }, $block);
             // Miscellaneous…
-            $block = \preg_replace_callback('/(?:' . \strtr(token_css_comment, ['/' => "\\/"]) . '|' . token_string . '|\s*[:;,]\s*)/', static function($m) {
+            $block = \preg_replace_callback('/(?:' . \strtr(token_css_comment, ['/' => "\\/"]) . '|' . token_string . '|\s*[:;,]\s*)/', static function ($m) {
                 if (is_token_css_comment($m[0]) || is_token_string($m[0])) {
                     return $m[0];
                 }
@@ -753,7 +753,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
 }
 
 function minify_html_content($token, $tag, $fn, int $quote = 2) {
-    return \preg_replace_callback('/^(\s*)<' . $tag . '(\s(?:' . token_string . '|[^>])*)?>([\s\S]*?)<\/' . $tag . '>(\s*)$/i', static function($m) use($fn, $quote, $tag) {
+    return \preg_replace_callback('/^(\s*)<' . $tag . '(\s(?:' . token_string . '|[^>])*)?>([\s\S]*?)<\/' . $tag . '>(\s*)$/i', static function ($m) use ($fn, $quote, $tag) {
         return $m[1] . minify_html_element('<' . $tag . $m[2] . '>', $quote) . \call_user_func($fn, $m[3]) . '</' . $tag . '>' . $m[4];
     }, $token);
 }
@@ -764,7 +764,7 @@ function minify_html_element($token, int $quote = 2) {
     $value = every([
         token_string,
         '\s' . token_html_name
-    ], static function($token, $chop) use($quote) {
+    ], static function ($token, $chop) use ($quote) {
         if (is_token_string($token)) {
             if (1 !== $quote) {
                 $v = \trim($token, '\'"');
@@ -789,7 +789,7 @@ function minify_html_element($token, int $quote = 2) {
     $value = \preg_replace('/(^|\s)(' . $any . ')=(?:""|"\2"|\'\2\'|\'\'|\2)/i', '$1$2', $value);
     // Minify inline CSS
     if (false !== \strpos($value, ' style=') || 0 === \strpos($value, 'style=')) {
-        $value = \preg_replace_callback('/(^|\s)(style)=(' . token_string . '|\S+)/i', static function($m) use($quote) {
+        $value = \preg_replace_callback('/(^|\s)(style)=(' . token_string . '|\S+)/i', static function ($m) use ($quote) {
             $m[3] = \substr(minify_css('x{' . \substr($m[3], 1, -1) . '}'), 2, -1);
             if (2 === $quote) {
                 if (
@@ -818,7 +818,7 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
     if ("" === ($in = \trim($in))) {
         return "";
     }
-    $out = every([token_html_comment], static function($token) use($comment) {
+    $out = every([token_html_comment], static function ($token) use ($comment) {
         if (1 === $comment) {
             return $token;
         }
@@ -850,12 +850,12 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
         '\s*' . token_html_element_exit . '\s*',
         '\s*' . token_html_element_enter . '\s*',
         '\s*' . token_html_entity . '\s*'
-    ], static function($token, $chop) use($comment, $quote) {
+    ], static function ($token, $chop) use ($comment, $quote) {
         if (is_token_html_comment($token)) {
             return $token; // Keep!
         }
         if (is_token_html_entity($token)) {
-            return \preg_replace_callback('/(?:' . token_html_entity . '|\s+)/i', static function($m) {
+            return \preg_replace_callback('/(?:' . token_html_entity . '|\s+)/i', static function ($m) {
                 if (is_token_html_entity($m[0])) {
                     $v = \html_entity_decode($m[0]);
                     return '&' !== $v && '<' !== $v && '>' !== $v ? $v : $m[0];
@@ -864,17 +864,17 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
             }, $chop);
         }
         if ('</pre>' === \substr($token, -6)) {
-            return \preg_replace_callback('/' . token_html_element_enter . '/', static function($m) use($quote) {
+            return \preg_replace_callback('/' . token_html_element_enter . '/', static function ($m) use ($quote) {
                 return minify_html_element($m[0], $quote);
             }, $token);
         }
         if ('</textarea>' === \substr($token, -11)) {
-            return \preg_replace_callback('/' . token_html_element_enter . '/', static function($m) use($quote) {
+            return \preg_replace_callback('/' . token_html_element_enter . '/', static function ($m) use ($quote) {
                 return minify_html_element($m[0], $quote);
             }, $chop);
         }
         if ('</script>' === \substr($token, -9)) {
-            return minify_html_content($token, 'script', static function($v) use($comment, $quote, $token) {
+            return minify_html_content($token, 'script', static function ($v) use ($comment, $quote, $token) {
                 if ($m = get_html_name($token)) {
                     if (false !== \strpos($m[1], 'type=') && \preg_match('/\btype=([\'"]?)application\/(?:ld\+)?json\1/i', $m[1])) {
                         return minify_json($v, $comment, $quote);
@@ -884,13 +884,13 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
             }, $quote);
         }
         if ('</style>' === \substr($token, -8)) {
-            return minify_html_content($token, 'style', static function($v) use($comment, $quote) {
+            return minify_html_content($token, 'style', static function ($v) use ($comment, $quote) {
                 return minify_css($v, $comment, $quote);
             }, $quote);
         }
         if (is_token_element($token)) {
             if ('</code>' === \substr($token, -7)) {
-                $chop = minify_html_content($chop, 'code', static function($v) use($comment, $quote) {
+                $chop = minify_html_content($chop, 'code', static function ($v) use ($comment, $quote) {
                     return minify_html($v, $comment, $quote);
                 }, $quote);
             } else {
@@ -903,7 +903,7 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
                 }
             }
             if (' <' === \substr($chop, 0, 2) || '> ' === \substr($chop, -2)) {
-                return \preg_replace_callback('/<' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>/', static function($m) use($quote) {
+                return \preg_replace_callback('/<' . token_html_name . '(?:\s(?:' . token_string . '|[^>])*)?>/', static function ($m) use ($quote) {
                     return minify_html_element($m[0], $quote);
                 }, $chop);
             }
@@ -924,7 +924,7 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
         token_string,
         token_js_string,
         token_js_pattern
-    ], static function($token) use($comment, $quote) {
+    ], static function ($token) use ($comment, $quote) {
         if (is_token_js_comment($token)) {
             if (1 === $comment) {
                 if (0 === \strpos($token, '//')) {
@@ -962,10 +962,10 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
         token_number,
         '\b(?:case|return|typeof|void)\s*(?=[-.\d])',
         '[%&()*+,\-/:;<=>?\[\]^{|}]'
-    ], static function($token, $chop) use($comment, $quote) {
+    ], static function ($token, $chop) use ($comment, $quote) {
         if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_js_string($token)) {
             if ('`' === $token[0] && false !== \strpos($token, '${')) {
-                return \preg_replace_callback('/\$\{\s*((?:' . token_string . '|[^{}]|(?R))*)\s*\}/', static function($m) use($comment, $quote) {
+                return \preg_replace_callback('/\$\{\s*((?:' . token_string . '|[^{}]|(?R))*)\s*\}/', static function ($m) use ($comment, $quote) {
                     return '${' . minify_js($m[1], $comment, $quote) . '}';
                 }, $token);
             }
@@ -999,7 +999,7 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
         token_string,
         token_js_string,
         '\(\s*' . token_js_name . '\s*\)\s*=>'
-    ], static function($token, $chop) use($quote) {
+    ], static function ($token, $chop) use ($quote) {
         if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_js_string($token)) {
             return $token;
         }
@@ -1032,180 +1032,140 @@ function minify_json(string $in, int $comment = 2, int $quote = 1) {
     return \json_encode(\json_decode($in), \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
 }
 
-// Based on <https://php.net/manual/en/function.php-strip-whitespace.php#82437>
 function minify_php(string $in, int $comment = 2, int $quote = 1) {
     $out = "";
-    $t = [];
-    // White-space(s) around these token(s) can be removed :)
-    foreach ([
-        'AND_EQUAL',
-        'ARRAY_CAST',
-        'BOOLEAN_AND',
-        'BOOLEAN_OR',
-        'BOOL_CAST',
-        'COALESCE',
-        'CONCAT_EQUAL',
-        'DEC',
-        'DIV_EQUAL',
-        'DOLLAR_OPEN_CURLY_BRACES',
-        'DOUBLE_ARROW',
-        'DOUBLE_CAST',
-        'DOUBLE_COLON',
-        'INC',
-        'INT_CAST',
-        'IS_EQUAL',
-        'IS_GREATER_OR_EQUAL',
-        'IS_IDENTICAL',
-        'IS_NOT_EQUAL',
-        'IS_NOT_IDENTICAL',
-        'IS_SMALLER_OR_EQUAL',
-        'MINUS_EQUAL',
-        'MOD_EQUAL',
-        'MUL_EQUAL',
-        'OBJECT_OPERATOR',
-        'OR_EQUAL',
-        'PAAMAYIM_NEKUDOTAYIM',
-        'PLUS_EQUAL',
-        'POW',
-        'POW_EQUAL',
-        'SL',
-        'SL_EQUAL',
-        'SPACESHIP',
-        'SR',
-        'SR_EQUAL',
-        'STRING_CAST',
-        'XOR_EQUAL'
-    ] as $v) {
-        if (\defined($v = "\\T_" . $v)) {
-            $t[\constant($v)] = 1;
+    $tokens = \token_get_all($in);
+    foreach ($tokens as $k => $v) {
+        // Peek previous token
+        if (\is_array($prev = $tokens[$k - 1] ?? "")) {
+            $prev = $prev[1];
         }
-    }
-    $c = \count($toks = \token_get_all($in));
-    $doc = $skip = false;
-    $start = $end = null;
-    for ($i = 0; $i < $c; ++$i) {
-        $tok = $toks[$i];
-        if (\is_array($tok)) {
-            $id = $tok[0];
-            $token = $tok[1];
-            if (\T_INLINE_HTML === $id) {
-                $out .= $token;
-                $skip = false;
-            } else {
-                if (\T_OPEN_TAG === $id) {
-                    $out .= \rtrim($token) . ' ';
-                    $start = \T_OPEN_TAG;
-                    $skip = true;
-                } else if (\T_OPEN_TAG_WITH_ECHO === $id) {
-                    $out .= $token;
-                    $start = \T_OPEN_TAG_WITH_ECHO;
-                    $skip = true;
-                } else if (\T_CLOSE_TAG === $id) {
-                    if (\T_OPEN_TAG_WITH_ECHO === $start) {
-                        $out = \rtrim($out, '; ');
-                    } else {
-                        $token = ' ' . $token;
-                    }
-                    $out .= \trim($token);
-                    $start = null;
-                    $skip = false;
-                } else if (isset($t[$id])) {
-                    $out .= $token;
-                    $skip = true;
-                } else if (\T_ENCAPSED_AND_WHITESPACE === $id || \T_CONSTANT_ENCAPSED_STRING === $id) {
-                    if ('"' === $token[0]) {
-                        $token = \addcslashes($token, "\n\r\t");
-                    }
-                    $out .= $token;
-                    $skip = true;
-                } else if (\T_WHITESPACE === $id) {
-                    $n = $toks[$i + 1] ?? null;
-                    if (!$skip && (!\is_string($n) || '$' === $n) && !isset($t[$n[0]])) {
-                        $out .= ' ';
-                    }
-                    $skip = false;
-                } else if (\T_START_HEREDOC === $id) {
-                    $out .= "<<<" . ("'" === $token[3] ? "'S'" : 'S') . "\n";
-                    $skip = false;
-                    $doc = true; // Enter (HERE/NOW)DOC
-                } else if (\T_END_HEREDOC === $id) {
-                    $out .= "S\n";
-                    $skip = true;
-                    $doc = false; // Exit (HERE/NOW)DOC
-                    for ($j = $i + 1; $j < $c; ++$j) {
-                        if (\is_string($v = $toks[$j])) {
-                            $out .= $v;
-                            if (';' === $v || ',' === $v) {
-                                if ("\nS\n" . $v === \substr($out, -4)) {
-                                    $out = \rtrim($out, "\n" . $v) . $v;
-                                    // Prior to PHP 7.3.0, it is very important to note that the line with the closing
-                                    // identifier must contain no other characters, except a semicolon (`;`). That means
-                                    // especially that the identifier may not be indented, and there may not be any
-                                    // spaces or tabs before or after the semicolon. It's also important to realize that
-                                    // the first character before the closing identifier must be a newline as defined by
-                                    // the local operating system. This is `\n` on UNIX systems, including macOS. The
-                                    // closing delimiter must also be followed by a newline.
-                                    //
-                                    // <https://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc>
-                                    if (';' === $v) {
-                                        $out .= "\n";
-                                    }
-                                }
-                                $i = $j;
-                                break;
-                            }
-                        } else if (\T_CLOSE_TAG === $v[0]) {
-                            break;
-                        } else {
-                            $out .= \trim($v[1]);
-                        }
-                    }
-                } else if (\T_COMMENT === $id || \T_DOC_COMMENT === $id) {
-                    if (
-                        1 === $comment || (
-                            2 === $comment && (
-                                // Detect special comment(s) from the third character
-                                // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                                !empty($token[2]) && false !== \strpos('!*', $token[2]) ||
-                                // Detect license comment(s) from the content
-                                // It should contains character(s) like `@license`
-                                false !== \strpos($token, '@licence') || // noun
-                                false !== \strpos($token, '@license') || // verb
-                                false !== \strpos($token, '@preserve')
-                            )
-                        )
-                    ) {
-                        $token = \ltrim(\substr($token, 2, -2), '!*');
-                        $out .= '/*' . \trim(\strtr($token, ['@preserve' => ""])) . '*/';
-                    }
-                    $skip = true;
-                } else {
-                    $out .= $token;
-                    $skip = false;
+        // Peek next token
+        if (\is_array($next = $tokens[$k + 1] ?? "")) {
+            $next = $next[1];
+        }
+        if (\is_array($v)) {
+            if (\T_CLOSE_TAG === $v[0]) {
+                // <https://www.php.net/manual/en/language.basic-syntax.instruction-separation.php>
+                if ("" === $next) {
+                    continue; // Remove the last PHP closing tag
+                }
+                if (';' === \substr($out, -1)) {
+                    $out = \substr($out, 0, -1); // Remove the last semi-colon before PHP closing tag
                 }
             }
-            $end = "";
-        } else {
-            if (false === \strpos(';:', $tok) || $end !== $tok) {
-                $out .= $tok;
-                $end = $tok;
+            if (\T_OPEN_TAG === $v[0]) {
+                $out .= \rtrim($v[1]); // Remove white-space(s) after PHP opening tag
+                continue;
             }
-            $skip = true;
+            if (\T_ECHO === $v[0]) {
+                if ('<?php' === \substr($out, -5)) {
+                    $out = \substr($out, 0, -3) . '='; // Replace `<?php echo` with `<?=`
+                    continue;
+                }
+            }
+            if (\T_IF === $v[0]) {
+                if ('else ' === \substr($out, -5)) {
+                    $out = \substr($out, 0, -1) . 'if'; // Replace `else if` with `elseif`
+                    continue;
+                }
+            }
+            if (\T_COMMENT === $v[0] || \T_DOC_COMMENT === $v[0]) {
+                if (
+                    // Keep comment
+                    1 === $comment || (
+                        // Keep comment with condition(s)
+                        2 === $comment && (
+                            // Detect special comment from the third character
+                            // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
+                            !empty($v[1][2]) && false !== \strpos('!*', $v[1][2]) ||
+                            // Detect license comment from the content
+                            // It should contains character(s) like `@license`
+                            false !== \strpos($v[1], '@licence') || // noun
+                            false !== \strpos($v[1], '@license') || // verb
+                            false !== \strpos($v[1], '@preserve')
+                        )
+                    )
+                ) {
+                    $v[1] = \ltrim(\substr($v[1], 2, -2), '!*');
+                    $out .= '/*' . \trim(\strtr($v[1], ['@preserve' => ""])) . '*/';
+                    continue;
+                }
+                // Remove comment
+                continue;
+            }
+            if (\T_START_HEREDOC === $v[0]) {
+                $out .= '<<<' . ("'" === $v[1][3] ? "'S'" : 'S') . "\n";
+                continue;
+            }
+            if (\T_END_HEREDOC === $v[0]) {
+                $out .= 'S';
+                // Prior to PHP 7.3.0, it is very important to note that the line with the closing identifier must
+                // contain no other character(s), except a semicolon (`;`). That means especially that the identifier
+                // may not be indented, and there may not be any space(s) or tab(s) before or after the semicolon.
+                // It’s also important to realize that the first character before the closing identifier must be a
+                // new-line as defined by the local operating system. This is `\n` on UNIX system(s), including macOS.
+                // The closing delimiter must also be followed by a new-line.
+                //
+                // <https://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc>
+                if (\version_compare(\PHP_VERSION, '7.3.0') < 0) {
+                    if (';' === $next) {
+                        if (\is_array($tokens[$k + 1])) {
+                            $tokens[$k + 1][1] .= "\n";
+                        } else {
+                            $tokens[$k + 1] .= "\n";
+                        }
+                        continue;
+                    }
+                    if (',' !== $next) {
+                        $out .= "\n";
+                        continue;
+                    }
+                }
+                continue;
+            }
+            if (\T_CONSTANT_ENCAPSED_STRING === $v[0] || \T_ENCAPSED_AND_WHITESPACE === $v[0]) {
+                $out .= $v[1];
+                continue;
+            }
+            if (\T_WHITESPACE === $v[0]) {
+                if (!$next || !$prev) {
+                    continue;
+                }
+                // Check if previous or next token contains only punctuation mark(s). White-space around this
+                // token usually safe to be removed. They must be PHP operator(s) like `&&` and `&=`.
+                // Of course, they can also be present in comment and string, but we already filtered them.
+                if (
+                    (\function_exists("\\ctype_punct") && \ctype_punct($next) || \preg_match('/^\p{P}$/', $next)) ||
+                    (\function_exists("\\ctype_punct") && \ctype_punct($prev) || \preg_match('/^\p{P}$/', $prev))
+                ) {
+                    continue;
+                }
+                // Check if previous or next token is a comment, then remove white-space around it!
+                if (
+                    (0 === \strpos($prev, '#')) ||
+                    (0 === \strpos($prev, '//')) ||
+                    ('/*' === \substr($next, 0, 2) && '*/' === \substr($next, -2)) ||
+                    ('/*' === \substr($prev, 0, 2) && '*/' === \substr($prev, -2))
+                ) {
+                    continue;
+                }
+                // Remove white-space after short echo
+                if ('<?=' === \substr($out, -3)) {
+                    continue;
+                }
+                // Convert multiple white-space into single space
+                $out .= ' ';
+            }
+            $out .= ("" === \trim($v[1]) ? "" : $v[1]);
+            continue;
         }
+        // Remove trailing `,`
+        if (',' === \substr($out, -1) && false !== \strpos(')]}', $v)) {
+            $out = \substr($out, 0, -1);
+        }
+        $out .= ("" === \trim($v) ? "" : $v);
     }
-    $out = every([
-        '\s*' . token_string . '\s*',
-        '\s*<\?php echo ',
-        ';\?>\s*'
-    ], static function($token, $chop) {
-        if (is_token_string($token)) {
-            return $chop;
-        }
-        return \strtr($chop, [
-            '<?php echo ' => '<?=',
-            ';?>' => '?>'
-        ]);
-    }, $out);
     return $out;
 }
 
