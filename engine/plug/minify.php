@@ -1055,12 +1055,12 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 }
             }
             if (\T_OPEN_TAG === $v[0]) {
-                $out .= \rtrim($v[1]); // Remove white-space(s) after PHP opening tag
+                $out .= \rtrim($v[1]) . ' ';
                 continue;
             }
             if (\T_ECHO === $v[0]) {
-                if ('<?php' === \substr($out, -5)) {
-                    $out = \substr($out, 0, -3) . '='; // Replace `<?php echo` with `<?=`
+                if ('<?php ' === \substr($out, -6)) {
+                    $out = \substr($out, 0, -4) . '='; // Replace `<?php echo` with `<?=`
                     continue;
                 }
             }
@@ -1132,6 +1132,9 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 if (!$next || !$prev) {
                     continue;
                 }
+                if ('<?php ' === \substr($out, -6)) {
+                    continue; // Has been followed by single space, skip!
+                }
                 // Check if previous or next token contains only punctuation mark(s). White-space around this
                 // token usually safe to be removed. They must be PHP operator(s) like `&&` and `||`.
                 // Of course, they can also be present in comment and string, but we already filtered them.
@@ -1139,6 +1142,11 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     (\function_exists("\\ctype_punct") && \ctype_punct($next) || \preg_match('/^\p{P}$/', $next)) ||
                     (\function_exists("\\ctype_punct") && \ctype_punct($prev) || \preg_match('/^\p{P}$/', $prev))
                 ) {
+                    // `_` is a punctuation but it can be used to name a valid constant, function and property
+                    if ('_' === $next) {
+                        $out .= ' ';
+                        continue;
+                    }
                     continue;
                 }
                 // Check if previous or next token is a comment, then remove white-space around it!

@@ -104,4 +104,16 @@ use foo\bar\{
 // Test named argument(s)
 baz(qux: 5);
 
+// Do not collapse `function` to `_` so that they become `function_`
+function _() {
+    // Test!
+}
+
+// Do not collapse `const` to `_` so that they become `const_`
+const _ = 1;
+
 ?>
+
+<?php       !session_id() && session_start(); ?>
+<?php       /* comment */   ?>
+<?php       (function () {})(); ?>
