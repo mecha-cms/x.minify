@@ -1133,7 +1133,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     continue;
                 }
                 // Check if previous or next token contains only punctuation mark(s). White-space around this
-                // token usually safe to be removed. They must be PHP operator(s) like `&&` and `&=`.
+                // token usually safe to be removed. They must be PHP operator(s) like `&&` and `||`.
                 // Of course, they can also be present in comment and string, but we already filtered them.
                 if (
                     (\function_exists("\\ctype_punct") && \ctype_punct($next) || \preg_match('/^\p{P}$/', $next)) ||
@@ -1143,10 +1143,12 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 }
                 // Check if previous or next token is a comment, then remove white-space around it!
                 if (
-                    (0 === \strpos($prev, '#')) ||
-                    (0 === \strpos($prev, '//')) ||
-                    ('/*' === \substr($next, 0, 2) && '*/' === \substr($next, -2)) ||
-                    ('/*' === \substr($prev, 0, 2) && '*/' === \substr($prev, -2))
+                    0 === \strpos($next, '#') ||
+                    0 === \strpos($prev, '#') ||
+                    0 === \strpos($next, '//') ||
+                    0 === \strpos($prev, '//') ||
+                    '/*' === \substr($next, 0, 2) && '*/' === \substr($next, -2) ||
+                    '/*' === \substr($prev, 0, 2) && '*/' === \substr($prev, -2)
                 ) {
                     continue;
                 }
@@ -1154,7 +1156,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 if ('<?=' === \substr($out, -3)) {
                     continue;
                 }
-                // Convert multiple white-space into single space
+                // Convert multiple white-space to single space
                 $out .= ' ';
             }
             $out .= ("" === \trim($v[1]) ? "" : $v[1]);
