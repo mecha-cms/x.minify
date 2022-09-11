@@ -53,6 +53,12 @@ return -0.5;
 
 return -.5;
 
+return new Foo;
+
+return foo();
+
+return foo;
+
 // http://example.com
 // 'http://example.com'
 // //example.com

@@ -1088,6 +1088,10 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     continue;
                 }
             }
+            if (\T_CASE === $v[0] || \T_RETURN === $v[0]) {
+                $out .= $v[1] . ' ';
+                continue;
+            }
             if (\T_IF === $v[0]) {
                 if ('else ' === \substr($out, -5)) {
                     $out = \substr($out, 0, -1) . 'if'; // Replace `else if` with `elseif`
@@ -1142,7 +1146,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 continue;
             }
             if (\T_WHITESPACE === $v[0]) {
-                if (!$next || !$prev) {
+                if ("" === $next || "" === $prev) {
                     continue;
                 }
                 if (' ' === \substr($out, -1)) {
@@ -1190,6 +1194,11 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
         // Remove trailing `,`
         if (',' === \substr($out, -1) && false !== \strpos(')]}', $v)) {
             $out = \substr($out, 0, -1);
+        }
+        if ('case ' === \substr($out, -5) || 'return ' === \substr($out, -7)) {
+            if ($v && false !== \strpos('([', $v[0])) {
+                $out = \substr($out, 0, -1);
+            }
         }
         $out .= ("" === \trim($v) ? "" : $v);
     }
