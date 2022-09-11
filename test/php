@@ -112,6 +112,20 @@ function _() {
 // Do not collapse `const` to `_` so that they become `const_`
 const _ = 1;
 
+// Remove white-space around type cast
+$int = (int) '123';
+$int = (  int  ) 123;
+
+// The `(unset)` type cast is removed in PHP 8.0.0
+$unset = (unset) 1;
+$unset = (  unset  ) 1;
+
+// Invalid type cast should be handled by generic white-space remover around punctuation
+$test = ( asdf ) 1;
+
+// Minify number(s)
+$numbers = [ 123, 123.00, 123.0, 0.123, .123 ];
+
 ?>
 
 <?php       !session_id() && session_start(); ?>

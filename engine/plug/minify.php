@@ -1045,6 +1045,30 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
             $next = $next[1];
         }
         if (\is_array($v)) {
+            if (\T_COMMENT === $v[0] || \T_DOC_COMMENT === $v[0]) {
+                if (
+                    // Keep comment
+                    1 === $comment || (
+                        // Keep comment with condition(s)
+                        2 === $comment && (
+                            // Detect special comment from the third character
+                            // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
+                            !empty($v[1][2]) && false !== \strpos('!*', $v[1][2]) ||
+                            // Detect license comment from the content
+                            // It should contains character(s) like `@license`
+                            false !== \strpos($v[1], '@licence') || // noun
+                            false !== \strpos($v[1], '@license') || // verb
+                            false !== \strpos($v[1], '@preserve')
+                        )
+                    )
+                ) {
+                    $v[1] = \ltrim(\substr($v[1], 2, -2), '!*');
+                    $out .= '/*' . \trim(\strtr($v[1], ['@preserve' => ""])) . '*/';
+                    continue;
+                }
+                // Remove comment
+                continue;
+            }
             if (\T_CLOSE_TAG === $v[0]) {
                 // <https://www.php.net/manual/en/language.basic-syntax.instruction-separation.php>
                 if ("" === $next) {
@@ -1070,28 +1094,12 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     continue;
                 }
             }
-            if (\T_COMMENT === $v[0] || \T_DOC_COMMENT === $v[0]) {
-                if (
-                    // Keep comment
-                    1 === $comment || (
-                        // Keep comment with condition(s)
-                        2 === $comment && (
-                            // Detect special comment from the third character
-                            // It should be a `!` or `*` → `/*! keep */` or `/** keep */`
-                            !empty($v[1][2]) && false !== \strpos('!*', $v[1][2]) ||
-                            // Detect license comment from the content
-                            // It should contains character(s) like `@license`
-                            false !== \strpos($v[1], '@licence') || // noun
-                            false !== \strpos($v[1], '@license') || // verb
-                            false !== \strpos($v[1], '@preserve')
-                        )
-                    )
-                ) {
-                    $v[1] = \ltrim(\substr($v[1], 2, -2), '!*');
-                    $out .= '/*' . \trim(\strtr($v[1], ['@preserve' => ""])) . '*/';
-                    continue;
+            if (\T_DNUMBER === $v[0]) {
+                if (0 === \strpos($v[1], '0.')) {
+                    $v[1] = \substr($v[1], 1); // Replace `0.` prefix with `.` from float
                 }
-                // Remove comment
+                $v[1] = \rtrim(\rtrim($v[1], '0'), '.'); // Remove trailing `.0` from float
+                $out .= $v[1];
                 continue;
             }
             if (\T_START_HEREDOC === $v[0]) {
@@ -1128,11 +1136,16 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 $out .= $v[1];
                 continue;
             }
+            // Any type cast
+            if (0 === \strpos($v[1], '(') && ')' === \substr($v[1], -1) && '_CAST' === \substr(\token_name($v[0]), -5)) {
+                $out .= '(' . \trim(\substr($v[1], 1, -1)) . ')'; // Remove white-space after `(` and before `)`
+                continue;
+            }
             if (\T_WHITESPACE === $v[0]) {
                 if (!$next || !$prev) {
                     continue;
                 }
-                if ('<?php ' === \substr($out, -6)) {
+                if (' ' === \substr($out, -1)) {
                     continue; // Has been followed by single space, skip!
                 }
                 // Check if previous or next token contains only punctuation mark(s). White-space around this
@@ -1158,6 +1171,10 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     '/*' === \substr($next, 0, 2) && '*/' === \substr($next, -2) ||
                     '/*' === \substr($prev, 0, 2) && '*/' === \substr($prev, -2)
                 ) {
+                    continue;
+                }
+                // Remove white-space after type cast
+                if (0 === \strpos($prev, '(') && ')' === \substr($prev, -1) && \preg_match('/^\(\s*[^()\s]+\s*\)$/', $prev)) {
                     continue;
                 }
                 // Remove white-space after short echo
