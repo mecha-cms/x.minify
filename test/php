@@ -111,9 +111,11 @@ function _() {
 
 // Do not collapse `const` to `_` so that they become `const_`
 const _ = 1;
+const _____ = 1;
 
-// Do not collapse `const` to `$` so that they become `const$`
-const $_ = 1;
+// Do not collapse `static` to `$` so that they become `static$`
+static $_ = 1;
+static $_____ = 1;
 
 // Remove white-space around type cast
 $int = (int) '123';
