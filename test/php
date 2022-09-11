@@ -112,6 +112,9 @@ function _() {
 // Do not collapse `const` to `_` so that they become `const_`
 const _ = 1;
 
+// Do not collapse `const` to `$` so that they become `const$`
+const $_ = 1;
+
 // Remove white-space around type cast
 $int = (int) '123';
 $int = (  int  ) 123;
@@ -165,6 +168,25 @@ return --123;
 return (array) $foo;
 
 return ( 2 + $foo );
+
+return ! $foo;
+
+switch ($foo) {
+    case 1:
+    case -1 :
+        $bar = 1;
+        break;
+    case [] :
+        $bar = [ 1 , 2 , 3 ];
+        break;
+    default: 0;
+}
+
+echo -1;
+
+print ( 123 + $foo );
+
+include ( __DIR__ . '/' . $foo . '.php' );
 
 ?>
 

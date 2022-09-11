@@ -59,6 +59,14 @@ return foo();
 
 return foo;
 
+return ++123;
+
+return --123;
+
+return ( 2 + foo );
+
+return ! foo;
+
 // http://example.com
 // 'http://example.com'
 // //example.com

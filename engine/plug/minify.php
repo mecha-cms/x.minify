@@ -302,7 +302,7 @@ function is_token_css_comment($token) {
     return '/*' === \substr($token, 0, 2) && '*/' === \substr($token, -2);
 }
 
-function is_token_css_function ($token) {
+function is_token_css_function($token) {
     return ')' === \substr($token, -1) && \strpos($token, '(') > 0;
 }
 
@@ -395,7 +395,7 @@ function minify_css_color($token) {
         return $v !== $token && \strlen($v) < \strlen($token) ? $v : $token;
     }
     $token = \preg_replace('/\s*([(),\/])\s*/', '$1', $token);
-    if (is_token_css_function ($token)) {
+    if (is_token_css_function($token)) {
         if (0 === \strpos($token, 'rgba(')) {
             // Remove solid alpha channel from RGB color
             if (',1)' === \substr($token, -3) || '/1)' === \substr($token, -3)) {
@@ -414,14 +414,14 @@ function minify_css_color($token) {
                 return \strlen($hex) < \strlen($token) ? $hex : $token;
             }
         }
-        // Assume that any number in other color function (s) can be minified anyway
+        // Assume that any number in other color function(s) can be minified anyway
     }
     $v = tokens_css_color_name[$token] ?? $token;
     return $v !== $token && \strlen($v) < \strlen($token) ? $v : $token;
 }
 
-function minify_css_function ($token, int $quote = 2) {
-    if (!$m = get_css_function ($token)) {
+function minify_css_function($token, int $quote = 2) {
+    if (!$m = get_css_function($token)) {
         return $token;
     }
     $name = $m[0];
@@ -505,8 +505,8 @@ function minify_css_values($token, int $quote = 2) {
         }
         if (is_token_css_hex($token) || isset(tokens_css_color_name[$token])) {
             $token = minify_css_color($token);
-        } else if (is_token_css_function ($token)) {
-            $token = minify_css_function ($token, $quote);
+        } else if (is_token_css_function($token)) {
+            $token = minify_css_function($token, $quote);
         } else if (is_token_css_unit($token)) {
             $token = minify_css_unit($token);
         }
@@ -520,7 +520,7 @@ function minify_css_values($token, int $quote = 2) {
         '\s*' . token_string . '\s*',
         '[;,/]'
     ], function ($token, $chop) {
-        if (is_token_css_comment($token) || is_token_string($token) || is_token_css_function ($token)) {
+        if (is_token_css_comment($token) || is_token_string($token) || is_token_css_function($token)) {
             return $chop;
         }
         return $token;
@@ -585,7 +585,7 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             }
             $selector = \preg_replace_callback('/((?:[a-z][a-z\d-]*)?)\(\s*((?:' . token_string . '|[^()]|(?R))*)\s*\)/', static function ($m) use ($comment, $quote) {
                 if ("" !== $m[1]) {
-                    return minify_css_function ($m[0], $quote);
+                    return minify_css_function($m[0], $quote);
                 }
                 return '(' . \substr(minify_css('x{' . $m[2] . '}', $comment, $quote), 2, -1) . ')';
             }, $selector);
@@ -960,8 +960,8 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
         token_js_pattern,
         token_boolean,
         token_number,
-        '\b(?:case|return|typeof|void)\s*(?=[-.\d])',
-        '[%&()*+,\-/:;<=>?\[\]^{|}]'
+        '\b(?:case|return|typeof|void)\s*(?=[+-.\d])',
+        '[!%&()*+,\-/:;<=>?\[\]^{|}]'
     ], static function ($token, $chop) use ($comment, $quote) {
         if (is_token_js_comment($token) || is_token_js_pattern($token) || is_token_js_string($token)) {
             if ('`' === $token[0] && false !== \strpos($token, '${')) {
@@ -1033,6 +1033,9 @@ function minify_json(string $in, int $comment = 2, int $quote = 1) {
 }
 
 function minify_php(string $in, int $comment = 2, int $quote = 1) {
+    if ("" === ($in = \trim($in))) {
+        return "";
+    }
     $out = "";
     $tokens = \token_get_all($in);
     foreach ($tokens as $k => $v) {
@@ -1082,13 +1085,15 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 $out .= \rtrim($v[1]) . ' ';
                 continue;
             }
-            if (\T_ECHO === $v[0]) {
+            if (\T_ECHO === $v[0] || \T_PRINT === $v[0]) {
                 if ('<?php ' === \substr($out, -6)) {
                     $out = \substr($out, 0, -4) . '='; // Replace `<?php echo` with `<?=`
                     continue;
                 }
+                $out .= 'echo '; // Replace `print` with `echo`
+                continue;
             }
-            if (\T_CASE === $v[0] || \T_RETURN === $v[0]) {
+            if (\T_CASE === $v[0] || \T_RETURN === $v[0] || \T_YIELD === $v[0]) {
                 $out .= $v[1] . ' ';
                 continue;
             }
@@ -1142,7 +1147,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
             }
             // Any type cast
             if (0 === \strpos($v[1], '(') && ')' === \substr($v[1], -1) && '_CAST' === \substr(\token_name($v[0]), -5)) {
-                $out .= '(' . \trim(\substr($v[1], 1, -1)) . ')'; // Remove white-space after `(` and before `)`
+                $out = \rtrim($out) . '(' . \trim(\substr($v[1], 1, -1)) . ')'; // Remove white-space after `(` and before `)`
                 continue;
             }
             if (\T_WHITESPACE === $v[0]) {
@@ -1159,7 +1164,14 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     (\function_exists("\\ctype_punct") && \ctype_punct($next) || \preg_match('/^\p{P}$/', $next)) ||
                     (\function_exists("\\ctype_punct") && \ctype_punct($prev) || \preg_match('/^\p{P}$/', $prev))
                 ) {
-                    // `_` is a punctuation but it can be used to name a valid constant, function and property
+                    // `$_` variable is all punctuation but it needs to be preceded by a space to ensure that we don’t
+                    // experience a result like `const$_=1` in the output.
+                    if ('$_' === $next && (\function_exists("\\ctype_alnum") && \ctype_alnum(\strtr($prev, ['_' => ""])) || \preg_match('/^\w+$/', $prev))) {
+                        $out .= ' ';
+                        continue;
+                    }
+                    // `_` is a punctuation but it needs to be preceded by a space to ensure that we don’t experience
+                    // a result like `function_(){}` or `const_=1` in the output.
                     if ('_' === $next) {
                         $out .= ' ';
                         continue;
@@ -1191,12 +1203,21 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
             $out .= ("" === \trim($v[1]) ? "" : $v[1]);
             continue;
         }
+        // Replace `-0` with `0`
+        if ('-' === $v && '0' === $next) {
+            continue;
+        }
         // Remove trailing `,`
         if (',' === \substr($out, -1) && false !== \strpos(')]}', $v)) {
             $out = \substr($out, 0, -1);
         }
-        if ('case ' === \substr($out, -5) || 'return ' === \substr($out, -7)) {
-            if ($v && false !== \strpos('([', $v[0])) {
+        if (
+            'case ' === \substr($out, -5) ||
+            'echo ' === \substr($out, -5) ||
+            'return ' === \substr($out, -7) ||
+            'yield ' === \substr($out, -6)
+        ) {
+            if ($v && false !== \strpos('!([', $v[0])) {
                 $out = \substr($out, 0, -1);
             }
         }
