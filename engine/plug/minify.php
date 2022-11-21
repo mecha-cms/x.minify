@@ -860,7 +860,7 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
                     $v = \html_entity_decode($m[0]);
                     return '&' !== $v && '<' !== $v && '>' !== $v ? $v : $m[0];
                 }
-                return ' ';
+                return \preg_replace('/\s+/', ' ', \trim($m[0], "\n"));
             }, $chop);
         }
         if ('</pre>' === \substr($token, -6)) {
