@@ -1142,17 +1142,19 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     (\function_exists("\\ctype_punct") && \ctype_punct($next) || \preg_match('/^\p{P}$/', $next)) ||
                     (\function_exists("\\ctype_punct") && \ctype_punct($prev) || \preg_match('/^\p{P}$/', $prev))
                 ) {
-                    // `$_` variable is all punctuation but it needs to be preceded by a space to
-                    // ensure that we don’t experience a result like `static$_=1` in the output.
-                    if ('$' === $next[0] && (\function_exists("\\ctype_alnum") && \ctype_alnum(\strtr($prev, ['_' => ""])) || \preg_match('/^\w+$/', $prev))) {
-                        $out .= ' ';
-                        continue;
-                    }
-                    // `_` is a punctuation but it needs to be preceded by a space to ensure that we
-                    // don’t experience a result like `function_(){}` or `const_=1` in the output.
-                    if ('_' === $next[0]) {
-                        $out .= ' ';
-                        continue;
+                    if (\function_exists("\\ctype_alnum") && \ctype_alnum(\strtr($prev, ['_' => ""])) || \preg_match('/^\w+$/', $prev)) {
+                        // `$_` variable is all punctuation but it needs to be preceded by a space to ensure that we
+                        // don’t experience a result like `static$_=1` in the output.
+                        if ('$' === $next[0]) {
+                            $out .= ' ';
+                            continue;
+                        }
+                        // `_` is a punctuation but it needs to be preceded by a space to ensure that we don’t
+                        // experience a result like `function_(){}` or `const_=1` in the output.
+                        if ('_' === $next[0]) {
+                            $out .= ' ';
+                            continue;
+                        }
                     }
                     continue;
                 }
