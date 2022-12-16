@@ -1,5 +1,5 @@
 {
-  "description": "Removes white-spaces and comments in HTML, CSS and JavaScript files.",
+  "description": "Removes white-spaces and comments in HTML, CSS, and JavaScript files.",
   "license": "GPL-3.0-or-later",
   "name": "mecha-cms/x.minify",
   "suggest": {
