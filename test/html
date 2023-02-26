@@ -138,6 +138,16 @@ id="foo"
 
 <input disabled="" readonly="readonly" required="invalid boolean value" type="text">
 
+<link rel="stylesheet" type="asdf">
+<link rel="stylesheet" type="text/css">
+
+<script type="asdf">asdf</script>
+<script type="text/javascript">asdf</script>
+<script type="application/javascript">asdf</script>
+
+<style type="asdf">asdf</style>
+<style type="text/css">asdf</style>
+
 <details open="open">
   <summary> text text </summary>
   text text text

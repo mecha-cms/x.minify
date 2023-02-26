@@ -787,6 +787,14 @@ function minify_html_element($token, int $quote = 2) {
     // <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes>
     $any = 'allow(?:fullscreen|paymentrequest)|async|auto(?:focus|play)|checked|controls|def(?:ault|er)|disabled|formnovalidate|hidden|ismap|itemscope|loop|multiple|muted|no(?:module|validate)|open|playsinline|re(?:adonly|quired|versed)|selected|truespeed';
     $value = \preg_replace('/(^|\s)(' . $any . ')=(?:""|"\2"|\'\2\'|\'\'|\2)/i', '$1$2', $value);
+    // Remove default attribute(s)
+    if ('link' === $name && false !== \strpos(' ' . $value, ' type=') && false !== \strpos(' ' . $value, ' rel=') && \preg_match('/\brel=([\'"]?)stylesheet\1/i', $value)) {
+        $value = \preg_replace('/(^|\s)type=([\'"]?)text\/css\2/i', "", $value);
+    } else if ('script' === $name && false !== \strpos(' ' . $value, ' type=')) {
+        $value = \preg_replace('/(^|\s)type=([\'"]?)(application|text)\/javascript\2/i', "", $value);
+    } else if ('style' === $name && false !== \strpos(' ' . $value, ' type=')) {
+        $value = \preg_replace('/(^|\s)type=([\'"]?)text\/css\2/i', "", $value);
+    }
     // Minify inline CSS
     if (false !== \strpos($value, ' style=') || 0 === \strpos($value, 'style=')) {
         $value = \preg_replace_callback('/(^|\s)(style)=(' . token_string . '|\S+)/i', static function ($m) use ($quote) {
