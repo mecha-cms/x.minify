@@ -6,9 +6,6 @@ color: '#534c44'
 author: Taufik Nurrohman
 type: Markdown
 version: 3.0.0
-
-use:
-  '.\lot\x\layout': 0
 ...
 
 This extension reduces the page size by removing unused white-spaces and comments in the HTML output.
