@@ -7,7 +7,7 @@ foreach ([
     'JSON' => 'json',
     'PHP' => 'php'
 ] as $k => $v) {
-    if ("" === ($content = file_get_contents(__DIR__ . D . 'test' . D . $v))) {
+    if ("" === ($content = file_get_contents(__DIR__ . D . 'test' . D . $v . '.txt'))) {
         continue;
     }
     echo '<h2>' . $k . '</h2>';
