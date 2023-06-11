@@ -1,6 +1,6 @@
 ---
 title: Minify
-description: Removes white-spaces and unused comments in HTML, CSS and JavaScript files.
+description: Removes white-spaces and unused comments from CSS, HTML, and JavaScript files.
 icon: 'M19.5,3.09L20.91,4.5L16.41,9H20V11H13V4H15V7.59L19.5,3.09M20.91,19.5L19.5,20.91L15,16.41V20H13V13H20V15H16.41L20.91,19.5M4.5,3.09L9,7.59V4H11V11H4V9H7.59L3.09,4.5L4.5,3.09M3.09,19.5L7.59,15H4V13H11V20H9V16.41L4.5,20.91L3.09,19.5Z'
 color: '#534c44'
 author: Taufik Nurrohman
@@ -8,128 +8,46 @@ type: Markdown
 version: 3.0.0
 ...
 
-This extension reduces the page size by removing unused white-spaces and comments in the HTML output.
-
-~~~ .php
-// `Minify::{$any}($in, $comment, $quote)`
-[
-    '.css' => [2, 2], // `[$comment, $quote]`
-    '.html' => [2, 1],
-    '.js' => [2],
-    '.json' => [],
-    '.php' => [2]
-]
-~~~
-
-Code | Description
----- | -----------
-`0` | Remove
-`1` | Keep
-`2` | Remove if/but/when…
-
-> **Note:** There is no such `0` option for `$quote`.
-
----
+This extension reduces page size by removing unused white-spaces and comments from HTML output.
 
 ### Usage
 
-#### HTML
-
-~~~ .xmp.php
-Minify::HTML(string $in, int $comment = 2, int $quote = 1): string;
-~~~
-
-Minify HTML string:
-
-~~~ .php
-echo Minify::HTML('<!DOCTYPE html>
-<html dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Test</title>
-    <!-- remove -->
-  </head>
-  <body>
-    <!--[if IE]> keep <![endif]-->
-    <h1>Test</h1>
-    <p>
-      <button>Button 1</button> <button>Button 2</button>
-    </p>
-  </body>
-</html>');
-~~~
-
 #### CSS
 
-~~~ .xmp.php
-Minify::CSS(string $in, int $comment = 2, int $quote = 2): string;
+~~~ .php
+Minify::CSS(string $from, int $comment = 2, int $quote = 2): string;
 ~~~
 
-Minify CSS string:
+#### HTML
 
 ~~~ .php
-echo Minify::CSS('* {
-  margin: 0;
-  padding: 0;
-  font: inherit;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-}
-
-/* remove */
-
-/*! keep */
-
-/** keep */
-
-/* @licence keep */
-
-/* @license keep */
-
-/* @preserve keep */
-
-html {
-  background: #fff;
-  color: #000;
-  font: normal normal 16px/1.25 sans-serif;
-}');
+Minify::HTML(string $from, int $comment = 2, int $quote = 1): string;
 ~~~
 
 #### JS
 
-~~~ .xmp.php
-Minify::JS(string $in, int $comment = 2, int $quote = 2): string;
-~~~
-
-Minify JavaScript string:
-
 ~~~ .php
-echo Minify::JS('var i, j, k = Date.now();
-
-for (i = 0, j = k; i < k; ++i) {
-    console.log("bark: " + i);
-}');
+Minify::JS(string $from, int $comment = 2, int $quote = 2): string;
 ~~~
 
 #### JSON
 
-~~~ .xmp.php
-Minify::JSON(string $in): string;
+~~~ .php
+Minify::JSON(string $from): string;
 ~~~
 
 #### PHP
 
-~~~ .xmp.php
-Minify::PHP(string $in, int $comment = 2): string;
+~~~ .php
+Minify::PHP(string $from, int $comment = 2): string;
 ~~~
 
----
-
-#### Options
+### Options
 
 Parameter | Description
 --------- | -----------
-`$in` | The string input to be minified.
-`$comment` | The `$comment` parameter value consists of `0`, `1` and `2`. `0` means remove all comments, `1` means preserve all comments, `2` means remove all comments except special comments like IE conditional comments or license comments.
-`$quote` | The `$quote` parameter value consists of `1` and `2`. `1` means preserve all quotes, `2` means remove quotes where possible.
+`$from` | The input string to be minified.
+`$comment` | The value of the `$comment` parameter consists of `0`, `1`, and `2`. `0` means remove all comments, `1` means preserve all comments, `2` means remove all comments except special comments like IE conditional comments or license comments.
+`$quote` | The value of the `$quote` parameter is `1` or `2`. `1` means to preserve all quotes, `2` means to remove quotes where possible. There is no such `0` option for `$quote`.
+
+ *[IE]: Internet Explorer

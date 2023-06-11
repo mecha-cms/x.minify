@@ -230,24 +230,24 @@
 \define(n . "\\token_js_pattern", '/(?:(?![*+?])(?:[^\n\[/\\\]|\\\.|\[(?:[^\n\]\\\]|\\\.)*\])+)/[gimuy]*');
 \define(n . "\\token_js_string", '`(?:[^`\\\]|\\\.)*`');
 
-function every(array $tokens, callable $fn = null, string $in = null, string $flag = 'i') {
-    if ("" === ($in = \trim($in))) {
+function every(array $tokens, callable $fn = null, string $from = null, string $flag = 'i') {
+    if ("" === ($from = \trim($from))) {
         return "";
     }
     $pattern = \strtr('(?:' . \implode(')|(?:', $tokens) . ')', ['/' => "\\/"]);
-    $chops = \preg_split('/(' . $pattern . ')/' . $flag, $in, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
+    $chops = \preg_split('/(' . $pattern . ')/' . $flag, $from, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
     if (!$fn) {
         return $chops;
     }
-    $out = "";
+    $to = "";
     while ($chops) {
         $chop = \array_shift($chops);
         if ("" === ($token = \trim($chop))) {
             continue;
         }
-        $out .= $fn($token, $chop);
+        $to .= $fn($token, $chop);
     }
-    return $out;
+    return $to;
 }
 
 function get_css_rules($token) {
@@ -528,11 +528,11 @@ function minify_css_values($token, int $quote = 2) {
     return \substr($token, 1, -1);
 }
 
-function minify_css(string $in, int $comment = 2, int $quote = 2) {
-    if ("" === ($in = \trim($in))) {
+function minify_css(string $from, int $comment = 2, int $quote = 2) {
+    if ("" === ($from = \trim($from))) {
         return "";
     }
-    $out = every([token_css_comment], static function ($token) use ($comment) {
+    $to = every([token_css_comment], static function ($token) use ($comment) {
         if (1 === $comment) {
             return $token;
         }
@@ -555,8 +555,8 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             return ""; // Remove!
         }
         return $token;
-    }, $in);
-    $out = every([
+    }, $from);
+    $to = every([
         token_css_rules,
         token_css_comment,
         '@charset\s+' . token_string . '\s*;',
@@ -748,8 +748,8 @@ function minify_css(string $in, int $comment = 2, int $quote = 2) {
             return $selector . '{' . $block . '}';
         }
         return $token;
-    }, $out);
-    return $out;
+    }, $to);
+    return $to;
 }
 
 function minify_html_content($token, $tag, $fn, int $quote = 2) {
@@ -822,11 +822,15 @@ function minify_html_element($token, int $quote = 2) {
     return '<' . $name . ("" !== $value ? ' ' . $value : "") . '>';
 }
 
-function minify_html(string $in, int $comment = 2, int $quote = 1) {
-    if ("" === ($in = \trim($in))) {
+function minify_html(string $from, int $comment = 2, int $quote = 1) {
+    if ("" === ($from = \trim($from))) {
         return "";
     }
-    $out = every([token_html_comment], static function ($token) use ($comment) {
+    // Hot fix for line break before and/or after flow element(s). Do not remove all of the white-space around them if
+    // they are surrounded by a plain text node. TODO: Remove this hack in the next release!
+    $from = \preg_replace('/(' . \strtr(token_html_element_exit, ['/' => "\\/"]) . ')\n([^<])/', '$1 $2', $from);
+    $from = \preg_replace('/([^>])\n(' . \strtr(token_html_element_enter, ['/' => "\\/"]) . ')/', '$1 $2', $from);
+    $to = every([token_html_comment], static function ($token) use ($comment) {
         if (1 === $comment) {
             return $token;
         }
@@ -849,8 +853,8 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
             return ""; // Remove!
         }
         return $token;
-    }, $in);
-    $out = every([
+    }, $from);
+    $to = every([
         '\s*' . token_html_comment . '\s*',
         '\s*' . token_html_dtd . '\s*',
         '\s*' . token_html_pi . '\s*',
@@ -918,15 +922,15 @@ function minify_html(string $in, int $comment = 2, int $quote = 1) {
             return minify_html_element($token, $quote);
         }
         return \preg_replace('/\s+/', ' ', $token);
-    }, $out);
-    return $out;
+    }, $to);
+    return $to;
 }
 
-function minify_js(string $in, int $comment = 2, int $quote = 2) {
-    if ("" === ($in = \trim($in))) {
+function minify_js(string $from, int $comment = 2, int $quote = 2) {
+    if ("" === ($from = \trim($from))) {
         return "";
     }
-    $out = every([
+    $to = every([
         token_js_comment,
         token_js_comment_2,
         token_string,
@@ -959,8 +963,8 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
             return ""; // Remove!
         }
         return $token;
-    }, $in);
-    $out = every([
+    }, $from);
+    $to = every([
         token_js_comment,
         token_js_comment_2,
         token_string,
@@ -997,8 +1001,8 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
             return $chop;
         }
         return $token;
-    }, $out);
-    $out = every([
+    }, $to);
+    $to = every([
         token_js_comment,
         token_js_comment_2,
         token_js_pattern,
@@ -1032,20 +1036,20 @@ function minify_js(string $in, int $comment = 2, int $quote = 2) {
             ',}' => '}',
             ';}' => '}'
         ]);
-    }, $out);
-    return $out;
+    }, $to);
+    return $to;
 }
 
-function minify_json(string $in, int $comment = 2, int $quote = 1) {
-    return \json_encode(\json_decode($in), \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
+function minify_json(string $from, int $comment = 2, int $quote = 1) {
+    return \json_encode(\json_decode($from), \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
 }
 
-function minify_php(string $in, int $comment = 2, int $quote = 1) {
-    if ("" === ($in = \trim($in))) {
+function minify_php(string $from, int $comment = 2, int $quote = 1) {
+    if ("" === ($from = \trim($from))) {
         return "";
     }
-    $out = "";
-    $tokens = \token_get_all($in);
+    $to = "";
+    $tokens = \token_get_all($from);
     foreach ($tokens as $k => $v) {
         // Peek previous token
         if (\is_array($prev = $tokens[$k - 1] ?? "")) {
@@ -1074,7 +1078,7 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     )
                 ) {
                     $v[1] = \ltrim(\substr($v[1], 2, -2), '!*');
-                    $out .= '/*' . \trim(\strtr($v[1], ['@preserve' => ""])) . '*/';
+                    $to .= '/*' . \trim(\strtr($v[1], ['@preserve' => ""])) . '*/';
                     continue;
                 }
                 // Remove comment
@@ -1085,29 +1089,29 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                 if ("" === $next) {
                     continue; // Remove the last PHP closing tag
                 }
-                if (';' === \substr($out, -1)) {
-                    $out = \substr($out, 0, -1); // Remove the last semi-colon before PHP closing tag
+                if (';' === \substr($to, -1)) {
+                    $to = \substr($to, 0, -1); // Remove the last semi-colon before PHP closing tag
                 }
             }
             if (\T_OPEN_TAG === $v[0]) {
-                $out .= \rtrim($v[1]) . ' ';
+                $to .= \rtrim($v[1]) . ' ';
                 continue;
             }
             if (\T_ECHO === $v[0] || \T_PRINT === $v[0]) {
-                if ('<?php ' === \substr($out, -6)) {
-                    $out = \substr($out, 0, -4) . '='; // Replace `<?php echo` with `<?=`
+                if ('<?php ' === \substr($to, -6)) {
+                    $to = \substr($to, 0, -4) . '='; // Replace `<?php echo` with `<?=`
                     continue;
                 }
-                $out .= 'echo '; // Replace `print` with `echo`
+                $to .= 'echo '; // Replace `print` with `echo`
                 continue;
             }
             if (\T_CASE === $v[0] || \T_RETURN === $v[0] || \T_YIELD === $v[0]) {
-                $out .= $v[1] . ' ';
+                $to .= $v[1] . ' ';
                 continue;
             }
             if (\T_IF === $v[0]) {
-                if ('else ' === \substr($out, -5)) {
-                    $out = \substr($out, 0, -1) . 'if'; // Replace `else if` with `elseif`
+                if ('else ' === \substr($to, -5)) {
+                    $to = \substr($to, 0, -1) . 'if'; // Replace `else if` with `elseif`
                     continue;
                 }
             }
@@ -1116,31 +1120,31 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     $v[1] = \substr($v[1], 1); // Replace `0.` prefix with `.` from float
                 }
                 $v[1] = \rtrim(\rtrim($v[1], '0'), '.'); // Remove trailing `.0` from float
-                $out .= $v[1];
+                $to .= $v[1];
                 continue;
             }
             if (\T_START_HEREDOC === $v[0]) {
-                $out .= '<<<' . ("'" === $v[1][3] ? "'S'" : 'S') . "\n";
+                $to .= '<<<' . ("'" === $v[1][3] ? "'S'" : 'S') . "\n";
                 continue;
             }
             if (\T_END_HEREDOC === $v[0]) {
-                $out .= 'S';
+                $to .= 'S';
                 continue;
             }
             if (\T_CONSTANT_ENCAPSED_STRING === $v[0] || \T_ENCAPSED_AND_WHITESPACE === $v[0]) {
-                $out .= $v[1];
+                $to .= $v[1];
                 continue;
             }
             // Any type cast
             if (0 === \strpos($v[1], '(') && ')' === \substr($v[1], -1) && '_CAST' === \substr(\token_name($v[0]), -5)) {
-                $out = \rtrim($out) . '(' . \trim(\substr($v[1], 1, -1)) . ')'; // Remove white-space after `(` and before `)`
+                $to = \rtrim($to) . '(' . \trim(\substr($v[1], 1, -1)) . ')'; // Remove white-space after `(` and before `)`
                 continue;
             }
             if (\T_WHITESPACE === $v[0]) {
                 if ("" === $next || "" === $prev) {
                     continue;
                 }
-                if (' ' === \substr($out, -1)) {
+                if (' ' === \substr($to, -1)) {
                     continue; // Has been followed by single space, skip!
                 }
                 // Check if previous or next token contains only punctuation mark(s). White-space around this
@@ -1154,13 +1158,13 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                         // `$_` variable is all punctuation but it needs to be preceded by a space to ensure that we
                         // don’t experience a result like `static$_=1` in the output.
                         if ('$' === $next[0]) {
-                            $out .= ' ';
+                            $to .= ' ';
                             continue;
                         }
                         // `_` is a punctuation but it needs to be preceded by a space to ensure that we don’t
                         // experience a result like `function_(){}` or `const_=1` in the output.
                         if ('_' === $next[0]) {
-                            $out .= ' ';
+                            $to .= ' ';
                             continue;
                         }
                     }
@@ -1182,13 +1186,13 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
                     continue;
                 }
                 // Remove white-space after short echo
-                if ('<?=' === \substr($out, -3)) {
+                if ('<?=' === \substr($to, -3)) {
                     continue;
                 }
                 // Convert multiple white-space to single space
-                $out .= ' ';
+                $to .= ' ';
             }
-            $out .= ("" === \trim($v[1]) ? "" : $v[1]);
+            $to .= ("" === \trim($v[1]) ? "" : $v[1]);
             continue;
         }
         // Replace `-0` with `0`
@@ -1196,22 +1200,22 @@ function minify_php(string $in, int $comment = 2, int $quote = 1) {
             continue;
         }
         // Remove trailing `,`
-        if (',' === \substr($out, -1) && false !== \strpos(')]}', $v)) {
-            $out = \substr($out, 0, -1);
+        if (',' === \substr($to, -1) && false !== \strpos(')]}', $v)) {
+            $to = \substr($to, 0, -1);
         }
         if (
-            'case ' === \substr($out, -5) ||
-            'echo ' === \substr($out, -5) ||
-            'return ' === \substr($out, -7) ||
-            'yield ' === \substr($out, -6)
+            'case ' === \substr($to, -5) ||
+            'echo ' === \substr($to, -5) ||
+            'return ' === \substr($to, -7) ||
+            'yield ' === \substr($to, -6)
         ) {
             if ($v && false !== \strpos('!([', $v[0])) {
-                $out = \substr($out, 0, -1);
+                $to = \substr($to, 0, -1);
             }
         }
-        $out .= ("" === \trim($v) ? "" : $v);
+        $to .= ("" === \trim($v) ? "" : $v);
     }
-    return $out;
+    return $to;
 }
 
 $state = \State::get('x.minify', true);

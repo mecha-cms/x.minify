@@ -166,3 +166,17 @@ id="foo"
 ">
   <p> text text text </p>
 </div>
+
+asdf
+<asdf> keep a space around this element </asdf>
+asdf
+
+asdf
+
+<asdf> remove any space around this element </asdf>
+
+asdf
+
+asdf <asdf>
+<asdf> remove any space around this element </asdf>
+</asdf> asdf
