@@ -264,8 +264,8 @@ function get_css_rules($token) {
     return [$selector, $block];
 }
 
-function get_css_function ($token) {
-    if (is_token_css_function ($token)) {
+function get_css_function($token) {
+    if (is_token_css_function($token)) {
         return \explode('(', \substr($token, 0, -1), 2);
     }
     return [];
