@@ -4,7 +4,7 @@
 
 \define(n . "\\token_boolean", '\b(?:true|false)\b');
 \define(n . "\\token_number", '-?(?:(?:\d+)?\.)?\d+');
-\define(n . "\\token_string", '(?:"(?:[^"\\\]|\\\.)*"|\'(?:[^\'\\\]|\\\.)*\')');
+\define(n . "\\token_string", '(?:"[^"\\\\]*(?:\\\\.[^"\\\\]*)*"|\'(?:[^\'\\\\]|\\\\.)*\')');
 
 \define(n . "\\token_css_spec", '(?:[^\0-\237]|\\[a-f\d]{1,6}(?:\n\r|[ \f\n\r\t])?|\\[^a-f\d\f\n\r])');
 
