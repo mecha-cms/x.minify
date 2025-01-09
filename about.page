@@ -1,53 +1,48 @@
 ---
 title: Minify
-description: Removes white-spaces and unused comments from CSS, HTML, and JavaScript files.
+description: Reduces CSS, HTML, JavaScript, JSON, PHP, and XML code size on the server side.
 icon: 'M19.5,3.09L20.91,4.5L16.41,9H20V11H13V4H15V7.59L19.5,3.09M20.91,19.5L19.5,20.91L15,16.41V20H13V13H20V15H16.41L20.91,19.5M4.5,3.09L9,7.59V4H11V11H4V9H7.59L3.09,4.5L4.5,3.09M3.09,19.5L7.59,15H4V13H11V20H9V16.41L4.5,20.91L3.09,19.5Z'
 color: '#534c44'
+link: 'https://github.com/taufik-nurrohman/minify'
 author: Taufik Nurrohman
 type: Markdown
-version: 3.0.0
+version: 4.0.0
 ...
-
-This extension reduces page size by removing unused white-spaces and comments from HTML output.
 
 ### Usage
 
 #### CSS
 
 ~~~ .php
-Minify::CSS(string $from, int $comment = 2, int $quote = 2): string;
+Minify::CSS(string $from): ?string;
 ~~~
 
 #### HTML
 
 ~~~ .php
-Minify::HTML(string $from, int $comment = 2, int $quote = 1): string;
+Minify::HTML(string $from): ?string;
 ~~~
 
 #### JS
 
 ~~~ .php
-Minify::JS(string $from, int $comment = 2, int $quote = 2): string;
+Minify::JS(string $from): ?string;
 ~~~
 
 #### JSON
 
 ~~~ .php
-Minify::JSON(string $from): string;
+Minify::JSON(string $from): ?string;
 ~~~
 
 #### PHP
 
 ~~~ .php
-Minify::PHP(string $from, int $comment = 2): string;
+Minify::PHP(string $from): ?string;
 ~~~
 
-### Options
+#### XML
 
-Parameter | Description
---------- | -----------
-`$from` | The input string to be minified.
-`$comment` | The value of the `$comment` parameter consists of `0`, `1`, and `2`. `0` means remove all comments, `1` means preserve all comments, `2` means remove all comments except special comments like IE conditional comments or license comments.
-`$quote` | The value of the `$quote` parameter is `1` or `2`. `1` means to preserve all quotes, `2` means to remove quotes where possible. There is no such `0` option for `$quote`.
-
- *[IE]: Internet Explorer
+~~~ .php
+Minify::XML(string $from): ?string;
+~~~

@@ -1,4 +1,2 @@
 .gitattributes export-ignore
 README.md export-ignore
-test export-ignore
-test.php export-ignore

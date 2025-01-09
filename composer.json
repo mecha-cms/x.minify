@@ -1,8 +1,5 @@
 {
-  "description": "Removes white-spaces and unused comments from CSS, HTML, and JavaScript files.",
+  "description": "Reduces CSS, HTML, JavaScript, JSON, PHP, and XML code size on the server side.",
   "license": "GPL-3.0-or-later",
-  "name": "mecha-cms/x.minify",
-  "suggest": {
-    "mecha-cms/x.layout": "Install this extension to automatically minify the HTML output."
-  }
+  "name": "mecha-cms/x.minify"
 }
