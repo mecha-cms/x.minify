@@ -14,35 +14,35 @@ version: 4.0.0
 #### CSS
 
 ~~~ .php
-Minify::CSS(string $from): ?string;
+Minify::CSS(?string $from): ?string;
 ~~~
 
 #### HTML
 
 ~~~ .php
-Minify::HTML(string $from): ?string;
+Minify::HTML(?string $from): ?string;
 ~~~
 
 #### JS
 
 ~~~ .php
-Minify::JS(string $from): ?string;
+Minify::JS(?string $from): ?string;
 ~~~
 
 #### JSON
 
 ~~~ .php
-Minify::JSON(string $from): ?string;
+Minify::JSON(?string $from): ?string;
 ~~~
 
 #### PHP
 
 ~~~ .php
-Minify::PHP(string $from): ?string;
+Minify::PHP(?string $from): ?string;
 ~~~
 
 #### XML
 
 ~~~ .php
-Minify::XML(string $from): ?string;
+Minify::XML(?string $from): ?string;
 ~~~
