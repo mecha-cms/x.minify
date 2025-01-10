@@ -15,6 +15,35 @@ namespace x\minify {
         $x_minify_j_s = \function_exists("\\x\\minify\\j_s");
         $x_minify_j_s_o_n = \function_exists("\\x\\minify\\j_s_o_n");
         $x_minify_x_m_l = \function_exists("\\x\\minify\\x_m_l");
+        // <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes>
+        $attr = [
+            'allowfullscreen' => 1,
+            'allowpaymentrequest' => 1,
+            'async' => 1,
+            'autofocus' => 1,
+            'autoplay' => 1,
+            'checked' => 1,
+            'controls' => 1,
+            'default' => 1,
+            'defer' => 1,
+            'disabled' => 1,
+            'formnovalidate' => 1,
+            'hidden' => 1,
+            'ismap' => 1,
+            'itemscope' => 1,
+            'loop' => 1,
+            'multiple' => 1,
+            'muted' => 1,
+            'nomodule' => 1,
+            'novalidate' => 1,
+            'open' => 1,
+            'playsinline' => 1,
+            'readonly' => 1,
+            'required' => 1,
+            'reversed' => 1,
+            'selected' => 1,
+            'truespeed' => 1
+        ];
         while (false !== ($chop = \strpbrk($from, $c1 . $c2))) {
             if ("" !== ($v = \strstr($from, $c = $chop[0], true))) {
                 $from = $chop;
@@ -49,54 +78,25 @@ namespace x\minify {
                     $q = \substr(\strtok($m[0], $c2 . '>'), 1);
                     foreach (\preg_split('/(' . $r3 . '|[!\/<=>?]|\s+)/', $m[0], -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY) as $v) {
                         $f = \ENT_HTML5 | \ENT_QUOTES;
-                        if (' style=' === \substr($to, -7) && $x_minify_c_s_s) {
-                            if (false !== \strpos('"\'', $v[0])) {
-                                $v = $v[0] . \rtrim(\htmlspecialchars(\substr(\x\minify\c_s_s('x{' . \htmlspecialchars_decode(\substr($v, 1, -1), $f) . '}'), 2, -1), $f), ';') . $v[0];
-                            } else {
-                                $v = \rtrim(\htmlspecialchars(\substr(\x\minify\c_s_s('x{' . \htmlspecialchars_decode(\substr($v, 1, -1), $f) . '}'), 2, -1), $f), ';');
-                            }
-                        } else if ('=' === \substr($to, -1) && $x_minify_j_s && \preg_match('/\son[^=]+=$/', $to)) {
-                            if (false !== \strpos('"\'', $v[0])) {
-                                $v = $v[0] . \rtrim(\htmlspecialchars(\x\minify\j_s(\htmlspecialchars_decode(\substr($v, 1, -1), $f)), $f), ';') . $v[0];
-                            } else {
-                                $v = \rtrim(\htmlspecialchars(\x\minify\j_s(\htmlspecialchars_decode($v, $f)), $f), ';');
-                            }
-                        }
-                        // <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes>
-                        if ('=' === \substr($to, -1)) {
-                            $attr = [
-                                'allowfullscreen',
-                                'allowpaymentrequest',
-                                'async',
-                                'autofocus',
-                                'autoplay',
-                                'checked',
-                                'controls',
-                                'default',
-                                'defer',
-                                'disabled',
-                                'formnovalidate',
-                                'hidden',
-                                'ismap',
-                                'itemscope',
-                                'loop',
-                                'multiple',
-                                'muted',
-                                'nomodule',
-                                'novalidate',
-                                'open',
-                                'playsinline',
-                                'readonly',
-                                'required',
-                                'reversed',
-                                'selected',
-                                'truespeed'
-                            ];
-                            while ($k = \array_pop($attr)) {
-                                if (' ' . $k . '=' === \substr($to, -(\strlen($k) + 2)) && ("''" === $v || '""' === $v || "'" . $k . "'" === $v || '"' . $k . '"' === $v || $k === $v || false !== \strpos($c2 . '/>', $v))) {
-                                    $to = \substr($to, 0, -1);
-                                    continue 2;
+                        if ('=' === \substr($to, -1) && ($test = \strrchr($to, ' '))) {
+                            $test = \substr($test, 1, -1);
+                            if ('class' === $test && false !== \strpos('"\'', $v[0])) {
+                                $v = $v[0] . \implode(' ', \array_unique(\preg_split('/\s+/', \trim(\substr($v, 1, -1))))) . $v[0];
+                            } else if ('style' === $test && $x_minify_c_s_s) {
+                                if (false !== \strpos('"\'', $v[0])) {
+                                    $v = $v[0] . \rtrim(\htmlspecialchars(\substr(\x\minify\c_s_s('x{' . \htmlspecialchars_decode(\substr($v, 1, -1), $f) . '}'), 2, -1), $f), ';') . $v[0];
+                                } else {
+                                    $v = \rtrim(\htmlspecialchars(\substr(\x\minify\c_s_s('x{' . \htmlspecialchars_decode(\substr($v, 1, -1), $f) . '}'), 2, -1), $f), ';');
                                 }
+                            } else if (0 === \strpos($test, 'on') && \preg_match('/^on\S+$/', $test)) {
+                                if (false !== \strpos('"\'', $v[0])) {
+                                    $v = $v[0] . \rtrim(\htmlspecialchars(\x\minify\j_s(\htmlspecialchars_decode(\substr($v, 1, -1), $f)), $f), ';') . $v[0];
+                                } else {
+                                    $v = \rtrim(\htmlspecialchars(\x\minify\j_s(\htmlspecialchars_decode($v, $f)), $f), ';');
+                                }
+                            } else if (isset($attr[$test]) && ("''" === $v || '""' === $v || "'" . $test . "'" === $v || '"' . $test . '"' === $v || $test === $v || false !== \strpos($c2 . '/>', $v))) {
+                                $to = \substr($to, 0, -1);
+                                continue;
                             }
                         }
                         if (false !== \strpos('"\'', $v[0]) && false !== \strpos($v, '&')) {

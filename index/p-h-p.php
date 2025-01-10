@@ -1,19 +1,38 @@
 <?php
 
-// TODO: Minify `array()` syntax
-
 namespace x\minify {
     function p_h_p(?string $from): ?string {
         if ("" === ($from = \trim($from ?? ""))) {
             return null;
         }
         $count = \count($lot = \token_get_all($from));
+        $in_array = $is_array = 0;
         $to = "";
         foreach ($lot as $k => $v) {
             if ('stdclass' === \strtolower(\substr($to, -8)) && \preg_match('/\bnew \\\\?stdclass$/i', $to, $m)) {
                 $to = \trim(\substr($to, 0, -\strlen($m[0]))) . '(object)[]';
             }
             if (\is_array($v)) {
+                // Can be `array $asdf` or `array (`
+                if (\T_ARRAY === $v[0]) {
+                    $i = $k + 1;
+                    while (isset($lot[$i])) {
+                        if (\is_array($lot[$i]) && \T_WHITESPACE !== $lot[$i][0]) {
+                            break;
+                        }
+                        if (\is_string($lot[$i])) {
+                            if ('(' === $lot[$i]) {
+                                $is_array += 1;
+                            }
+                            break;
+                        }
+                        ++$i;
+                    }
+                    if (!$is_array) {
+                        $to .= $v[1];
+                    }
+                    continue;
+                }
                 if ('_CAST' === \substr(\token_name($v[0]), -5)) {
                     $cast = \trim(\substr($v[1], 1, -1));
                     if ('boolean' === $cast) {
@@ -174,16 +193,24 @@ namespace x\minify {
                 $to .= $v[1];
                 continue;
             }
+            if ($is_array && '(' === $v) {
+                $in_array += 1;
+                $to = \trim($to) . '[';
+                continue;
+            }
+            if ($is_array && ')' === $v) {
+                if ($in_array === $is_array) {
+                    $in_array -= 1;
+                    $is_array -= 1;
+                    $to = \trim(\trim($to, ',')) . ']';
+                    continue;
+                }
+            }
             if (false !== \strpos('([', $v)) {
                 $to = \trim($to) . $v;
                 continue;
             }
             if (false !== \strpos(')]', $v)) {
-                // `array()` to `[]`
-                if ('array(' === \substr($to, -6)) {
-                    $to = \substr($to, 0, -6) . '[]';
-                    continue;
-                }
                 // `new stdclass()` to `(object)[]()` to `(object)[]`
                 if ('(object)[](' === \substr($to, -11)) {
                     $to = \substr($to, 0, -1);
