@@ -11,10 +11,10 @@ namespace x\minify {
         $r2 = "'[^']*'";
         $r3 = $r1 . '|' . $r2;
         $to = "";
-        $x_minify_c_s_s = \function_exists("\\x\\minify\\c_s_s");
-        $x_minify_j_s = \function_exists("\\x\\minify\\j_s");
-        $x_minify_j_s_o_n = \function_exists("\\x\\minify\\j_s_o_n");
-        $x_minify_x_m_l = \function_exists("\\x\\minify\\x_m_l");
+        $w1 = \function_exists(__NAMESPACE__ . "\\c_s_s");
+        $w2 = \function_exists(__NAMESPACE__ . "\\j_s");
+        $w3 = \function_exists(__NAMESPACE__ . "\\j_s_o_n");
+        $w4 = \function_exists(__NAMESPACE__ . "\\x_m_l");
         // <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes>
         $attr = [
             'allowfullscreen' => 1,
@@ -81,14 +81,14 @@ namespace x\minify {
                         if ('=' === \substr($to, -1) && ($test = \strrchr($to, ' '))) {
                             $test = \substr($test, 1, -1);
                             if ('class' === $test && false !== \strpos('"\'', $v[0])) {
-                                $v = $v[0] . \implode(' ', \array_unique(\preg_split('/\s+/', \trim(\substr($v, 1, -1))))) . $v[0];
-                            } else if ('style' === $test && $x_minify_c_s_s) {
+                                $v = $v[0] . \trim(\implode(' ', \array_unique(\preg_split('/\s+/', \trim(\substr($v, 1, -1)))))) . $v[0];
+                            } else if ('style' === $test && $w1) {
                                 if (false !== \strpos('"\'', $v[0])) {
                                     $v = $v[0] . \rtrim(\htmlspecialchars(\substr(\x\minify\c_s_s('x{' . \htmlspecialchars_decode(\substr($v, 1, -1), $f) . '}'), 2, -1), $f), ';') . $v[0];
                                 } else {
                                     $v = \rtrim(\htmlspecialchars(\substr(\x\minify\c_s_s('x{' . \htmlspecialchars_decode(\substr($v, 1, -1), $f) . '}'), 2, -1), $f), ';');
                                 }
-                            } else if (0 === \strpos($test, 'on') && \preg_match('/^on\S+$/', $test)) {
+                            } else if (0 === \strpos($test, 'on') && \preg_match('/^on\S+$/', $test) && $w2) {
                                 if (false !== \strpos('"\'', $v[0])) {
                                     $v = $v[0] . \rtrim(\htmlspecialchars(\x\minify\j_s(\htmlspecialchars_decode(\substr($v, 1, -1), $f)), $f), ';') . $v[0];
                                 } else {
@@ -127,22 +127,22 @@ namespace x\minify {
                                 if (false !== \strpos($m[0], 'type=')) {
                                     // <https://html.spec.whatwg.org/multipage/webappapis.html#import-maps>
                                     // <https://www.w3.org/TR/json-ld1>
-                                    if ($x_minify_j_s_o_n && \preg_match('/\stype=(["\']?)(?>application\/ld\+json|importmap)\1/', $m[0])) {
+                                    if ($w3 && \preg_match('/\stype=(["\']?)(?>application\/ld\+json|importmap)\1/', $m[0])) {
                                         $content = \x\minify\j_s_o_n($content);
-                                    } else if ($x_minify_j_s) {
+                                    } else if ($w2) {
                                         $content = \x\minify\j_s($content);
                                     }
-                                } else if ($x_minify_j_s) {
+                                } else if ($w2) {
                                     $content = \x\minify\j_s($content);
                                 }
                                 $content = \x\minify\j_s($content);
-                            } else if ('style' === $q && $x_minify_c_s_s) {
+                            } else if ('style' === $q && $w1) {
                                 $content = \trim($content);
                                 if ('<![CDATA[' === \substr($content, 0, 9) && ']]>' === \substr($content, -3)) {
                                     $content = \substr($content, 9, -3); // Remove character data section
                                 }
                                 $content = \x\minify\c_s_s($content);
-                            } else if ('svg' === $q && $x_minify_x_m_l) {
+                            } else if ('svg' === $q && $w4) {
                                 $content = \x\minify\x_m_l($content);
                             }
                             $to .= $content;
