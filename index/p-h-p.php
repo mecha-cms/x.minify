@@ -9,6 +9,7 @@ namespace x\minify {
         $in_array = $is_array = 0;
         $to = "";
         foreach ($lot as $k => $v) {
+            $open = '<?php ' === \substr($to, -6);
             if ('stdclass' === \strtolower(\substr($to, -8)) && \preg_match('/\bnew \\\\?stdclass$/i', $to, $m)) {
                 $to = \trim(\substr($to, 0, -\strlen($m[0]))) . '(object)[]';
             }
@@ -35,9 +36,11 @@ namespace x\minify {
                 }
                 if ('_CAST' === \substr(\token_name($v[0]), -5)) {
                     $cast = \trim(\substr($v[1], 1, -1));
-                    if ('boolean' === $cast) {
-                        $cast = 'bool';
-                    } else if ('double' === $cast || 'real' === $cast) {
+                    if ('bool' === $cast || 'boolean' === $cast) {
+                        $to .= '!!';
+                        continue;
+                    }
+                    if ('double' === $cast || 'real' === $cast) {
                         $cast = 'float';
                     } else if ('integer' === $cast) {
                         $cast = 'int';
@@ -68,7 +71,21 @@ namespace x\minify {
                     if ('(binary)' === \substr($to, -8)) {
                         $to = \substr($to, 0, -8) . 'b';
                     }
-                    $to = \trim($to) . $v[1];
+                    if ('(float)' === \substr($to, -7) && "" !== ($test = \filter_var($v[1], \FILTER_SANITIZE_NUMBER_FLOAT, \FILTER_FLAG_ALLOW_FRACTION | \FILTER_FLAG_ALLOW_SCIENTIFIC))) {
+                        $to = \substr($to, 0, -7) . '0+' . $test;
+                        continue;
+                    }
+                    if ('(int)' === \substr($to, -5) && "" !== ($test = \filter_var($v[1], \FILTER_SANITIZE_NUMBER_INT))) {
+                        $to = \substr($to, 0, -5) . '0+' . $test;
+                        continue;
+                    }
+                    if ('(string)' === \substr($to, -8)) {
+                        $to = \substr($to, 0, -8);
+                    }
+                    if (!$open) {
+                        $to = \trim($to);
+                    }
+                    $to .= $v[1];
                     continue;
                 }
                 if (\T_DNUMBER === $v[0]) {
@@ -90,7 +107,7 @@ namespace x\minify {
                     continue;
                 }
                 if (\T_ECHO === $v[0] || \T_PRINT === $v[0]) {
-                    if ('<?php ' === \substr($to, -6)) {
+                    if ($open) {
                         // Replace `<?php echo` with `<?=`
                         $to = \substr($to, 0, -4) . '=';
                         continue;
@@ -150,11 +167,23 @@ namespace x\minify {
                 if (\T_STRING === $v[0]) {
                     $test = \strtolower($v[1]);
                     if ('false' === $test) {
-                        $to = \trim($to) . '!1';
+                        if ('!!' === \substr($to, -2)) {
+                            $to = \substr($to, 0, -2);
+                        }
+                        if (!$open) {
+                            $to = \trim($to);
+                        }
+                        $to .= '!1';
                     } else if ('null' === $test) {
                         $to .= $test;
                     } else if ('true' === $test) {
-                        $to = \trim($to) . '!0';
+                        if ('!!' === \substr($to, -2)) {
+                            $to = \substr($to, 0, -2);
+                        }
+                        if (!$open) {
+                            $to = \trim($to);
+                        }
+                        $to .= '!0';
                     } else {
                         $to .= $v[1];
                     }
@@ -162,22 +191,19 @@ namespace x\minify {
                 }
                 // <https://stackoverflow.com/a/16606419/1163000>
                 if (\T_VARIABLE === $v[0]) {
-                    if ('(bool)' === \substr($to, -6)) {
-                        $to = \substr($to, 0, -6) . '!!' . $v[1];
-                    } else if ('(float)' === \substr($to, -7)) {
-                        $to = \substr($to, 0, -7) . $v[1] . '+0';
+                    if ('(float)' === \substr($to, -7)) {
+                        $to = \substr($to, 0, -7) . '0+' . $v[1];
                     } else if ('(int)' === \substr($to, -5)) {
-                        $to = \substr($to, 0, -5) . $v[1] . '+0';
+                        $to = \substr($to, 0, -5) . '0+' . $v[1];
                     } else if ('(string)' === \substr($to, -8)) {
-                        $to = \substr($to, 0, -8) . $v[1] . '.""';
+                        $to = \substr($to, 0, -8) . '"".' . $v[1];
                     } else if ("\x1a" === \substr($to, -1)) {
                         $to = \substr($to, 0, -1) . $v[1];
                     } else {
-                        if ('<?php ' === \substr($to, -6)) {
-                            $to .= $v[1];
-                        } else {
-                            $to = \trim($to) . $v[1];
+                        if (!$open) {
+                            $to = \trim($to);
                         }
+                        $to .= $v[1];
                     }
                     continue;
                 }
@@ -187,7 +213,10 @@ namespace x\minify {
                 }
                 // Math operator(s)
                 if (false !== \strpos('!%&*+-./<=>?|~', $v[1][0])) {
-                    $to = \trim($to) . $v[1];
+                    if (!$open) {
+                        $to = \trim($to);
+                    }
+                    $to .= $v[1];
                     continue;
                 }
                 $to .= $v[1];
@@ -195,19 +224,29 @@ namespace x\minify {
             }
             if ($is_array && '(' === $v) {
                 $in_array += 1;
-                $to = \trim($to) . '[';
+                if (!$open) {
+                    $to = \trim($to);
+                }
+                $to .= '[';
                 continue;
             }
             if ($is_array && ')' === $v) {
                 if ($in_array === $is_array) {
                     $in_array -= 1;
                     $is_array -= 1;
-                    $to = \trim(\trim($to, ',')) . ']';
+                    $to = \trim($to, ',');
+                    if (!$open) {
+                        $to = \trim($to);
+                    }
+                    $to .= ']';
                     continue;
                 }
             }
             if (false !== \strpos('([', $v)) {
-                $to = \trim($to) . $v;
+                if (!$open) {
+                    $to = \trim($to);
+                }
+                $to .= $v;
                 continue;
             }
             if (false !== \strpos(')]', $v)) {
@@ -216,10 +255,17 @@ namespace x\minify {
                     $to = \substr($to, 0, -1);
                     continue;
                 }
-                $to = \trim(\trim($to, ',')) . $v;
+                $to = \trim($to, ',');
+                if (!$open) {
+                    $to = \trim($to);
+                }
+                $to .= $v;
                 continue;
             }
-            $to = \trim($to) . $v;
+            if (!$open) {
+                $to = \trim($to);
+            }
+            $to .= $v;
         }
         return "" !== ($to = \trim(\strtr($to, ["\x1a" => ""]))) ? $to : null;
     }
